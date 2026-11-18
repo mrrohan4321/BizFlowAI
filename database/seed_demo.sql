@@ -1,0 +1,5 @@
+-- Synthetic demo: Sen Electricals (fictional). Known-answer scenario.
+-- TODO: fixed UUIDs diye insert koro. Expected: receivables 45000, payables 20000.
+-- INV-102  sales    30000 ABC Constructions  unpaid
+-- INV-103  sales    20000 Raj Electricals    5000 paid
+-- PUR-201  purchase 20000 XYZ Distributors   unpaid
