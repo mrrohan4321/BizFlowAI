@@ -12,3 +12,26 @@ dist/
 .idea/
 uploads/
 sample_data/real/
+
+# Python / testing
+.pytest_cache/
+.venvsource/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Logs & temp
+*.log
+*.tmp
+
+# Database files (local)
+*.sqlite3
+*.db
+
+# AI/ML artifacts (model weights, big data)
+*.pt
+*.pth
+*.h5
+*.pkl
+*.joblib
+*.onnx
