@@ -16,3 +16,6 @@ htmlcov/
 *.log
 ocr_output.txt
 sample_data/invoices/_ocr_temp_page_*.png
+.pytest_cache/
+.coverage
+htmlcov/

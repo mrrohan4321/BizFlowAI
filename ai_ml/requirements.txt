@@ -1,0 +1,7 @@
+
+groq==1.7.0
+pydantic==2.14.3
+python-dotenv==1.2.4
+rapidocr==3.10.0
+PyMuPDF==2.1
+Pillow==13.0.0

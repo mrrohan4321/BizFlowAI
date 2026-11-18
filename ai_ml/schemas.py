@@ -1,3 +1,4 @@
+
 """Pydantic data models shared across the BizFlow AI/ML package.
 
 These models define what valid data looks like. Pydantic checks the
@@ -5,6 +6,7 @@ data and raises an error when something is invalid, so bad values are
 never accepted silently.
 """
 
+import re
 from datetime import date
 from decimal import Decimal, InvalidOperation
 from enum import Enum
@@ -19,14 +21,14 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 class Severity(str, Enum):
     """How serious a validation message is."""
 
-    ERROR = "error"      # something is clearly wrong
-    WARNING = "warning"  # suspicious or missing, needs human review
+    ERROR = "error"
+    WARNING = "warning"
 
 
 class ValidationIssue(BaseModel):
     """One problem found while extracting or validating an invoice."""
 
-    field: str | None = None  # which field it is about, e.g. "total_amount"
+    field: str | None = None
     severity: Severity
     message: str
 
@@ -35,13 +37,12 @@ class ValidationIssue(BaseModel):
 # Invoice fields
 # --------------------------------------------------------------------------
 class InvoiceFields(BaseModel):
-    """The structured fields extracted from one invoice.
+    """Structured fields extracted from one invoice.
 
     Every field is optional because an invoice may not contain it.
-    A missing value stays None; we never invent values.
+    Missing values stay None; we never invent values.
     """
 
-    # Ignore any extra keys the LLM might add.
     model_config = ConfigDict(extra="ignore")
 
     invoice_number: str | None = None
@@ -58,55 +59,120 @@ class InvoiceFields(BaseModel):
     gstin: str | None = None
 
     @field_validator(
-        "subtotal", "tax_amount", "cgst", "sgst", "igst", "total_amount",
+        "subtotal",
+        "tax_amount",
+        "cgst",
+        "sgst",
+        "igst",
+        "total_amount",
         mode="before",
     )
     @classmethod
     def clean_amount(cls, value: Any) -> Decimal | None:
-        """Turn things like '₹30,000.50' or 30000 into a Decimal.
+        """Convert supported currency representations into finite Decimals.
 
-        Empty strings and None become None. Text that cannot be read as
-        a number raises an error instead of being guessed.
+        Examples:
+            '₹1,23,456.78' -> Decimal('123456.78')
+            'Rs. 12,500'    -> Decimal('12500')
+            'INR 500'       -> Decimal('500')
+
+        Empty values become None. Invalid or non-finite amounts are rejected.
         """
+
         if value is None:
             return None
+
         if isinstance(value, bool):
             raise ValueError("a boolean is not a valid amount")
+
         if isinstance(value, (int, float, Decimal)):
-            # str() first so floats do not carry binary rounding noise.
-            return Decimal(str(value))
-        if isinstance(value, str):
-            cleaned = (
-                value.replace("₹", "").replace("Rs.", "").replace("Rs", "")
-                .replace(",", "").strip()
-            )
-            if cleaned == "":
-                return None
             try:
-                return Decimal(cleaned)
-            except InvalidOperation:
-                raise ValueError(f"cannot read '{value}' as an amount")
-        raise ValueError(f"unsupported amount type: {type(value).__name__}")
+                amount = Decimal(str(value))
+            except InvalidOperation as exc:
+                raise ValueError("invalid monetary amount") from exc
+
+            if not amount.is_finite():
+                raise ValueError("amount must be a finite number")
+
+            return amount
+
+        if not isinstance(value, str):
+            raise ValueError(
+                f"unsupported amount type: {type(value).__name__}"
+            )
+
+        cleaned = value.strip()
+
+        if not cleaned:
+            return None
+
+        # Remove one recognized currency prefix.
+        cleaned = re.sub(
+            r"^(?:₹|Rs\.?|INR)\s*",
+            "",
+            cleaned,
+            count=1,
+            flags=re.IGNORECASE,
+        ).strip()
+
+        # Accept ungrouped digits, Indian comma grouping, or
+        # international comma grouping. Reject malformed separators.
+        valid_number = re.fullmatch(
+            r"[+-]?(?:"
+            r"\d+"
+            r"|\d{1,3}(?:,\d{2})*,\d{3}"
+            r"|\d{1,3}(?:,\d{3})+"
+            r")(?:\.\d+)?",
+            cleaned,
+        )
+
+        if not valid_number:
+            raise ValueError(
+                f"cannot read '{value}' as a valid monetary amount"
+            )
+
+        cleaned = cleaned.replace(",", "")
+
+        try:
+            amount = Decimal(cleaned)
+        except InvalidOperation as exc:
+            raise ValueError(
+                f"cannot read '{value}' as an amount"
+            ) from exc
+
+        if not amount.is_finite():
+            raise ValueError("amount must be a finite number")
+
+        return amount
 
     @field_validator("invoice_type", mode="before")
     @classmethod
     def clean_invoice_type(cls, value: Any) -> Any:
-        """Accept 'Sales' or ' PURCHASE '; anything else must be rejected."""
+        """Accept values such as 'Sales' and ' PURCHASE '."""
         if isinstance(value, str):
             value = value.strip().lower()
             return value or None
         return value
 
     @field_validator(
-        "invoice_number", "party_name", "gstin", mode="before"
+        "invoice_number",
+        "party_name",
+        "gstin",
+        mode="before",
     )
     @classmethod
     def clean_text(cls, value: Any) -> Any:
-        """Trim spaces; turn empty strings into None."""
+        """Trim spaces and convert empty strings into None."""
         if isinstance(value, str):
             value = value.strip()
             return value or None
         return value
+
+    @field_validator("gstin")
+    @classmethod
+    def normalize_gstin(cls, value: str | None) -> str | None:
+        """Normalize GSTIN to uppercase for consistent storage."""
+        return value.upper() if value is not None else None
 
 
 # --------------------------------------------------------------------------
@@ -120,9 +186,9 @@ class InvoiceExtractionResult(BaseModel):
 
     fields: InvoiceFields
     issues: list[ValidationIssue] = Field(default_factory=list)
-    needs_review: bool = True  # always True: a human must confirm
+    needs_review: bool = True
     source_file: str | None = None
-    raw_text_preview: str | None = None  # first part of the OCR text
+    raw_text_preview: str | None = None
 
 
 # --------------------------------------------------------------------------
@@ -131,12 +197,12 @@ class InvoiceExtractionResult(BaseModel):
 class ForecastResult(BaseModel):
     """A cash-flow estimate for one future month."""
 
-    forecast_period: str  # e.g. "December 2026"
+    forecast_period: str
     predicted_income: Decimal
     predicted_outflows: Decimal
     opening_cash: Decimal
     predicted_closing_cash: Decimal
-    method: str  # e.g. "3-month moving average"
+    method: str
     months_of_history_used: int
     disclaimer: str = "This is an estimate based on historical records."
     notes: list[str] = Field(default_factory=list)
@@ -150,6 +216,6 @@ class AssistantResponse(BaseModel):
 
     question: str
     answer: str
-    tool_used: str | None = None  # which approved function was called
-    data: dict[str, Any] | None = None  # the real calculated result
+    tool_used: str | None = None
+    data: dict[str, Any] | None = None
     insufficient_data: bool = False
