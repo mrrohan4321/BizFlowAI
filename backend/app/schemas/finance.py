@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from typing import Literal, Optional
 from uuid import UUID
@@ -49,5 +49,11 @@ class ExpenseUpdate(_Strict):
 
 class OpeningCashSet(_Strict):
     amount: Decimal = Field(max_digits=14, decimal_places=2)  # may be negative (overdraft)
-    as_of_date: date
+    as_of_date: date  # last day of a month: the forecast starts the month after it
     note: Optional[str] = Field(default=None, max_length=500)
+
+    @model_validator(mode="after")
+    def _month_end(self):
+        if (self.as_of_date + timedelta(days=1)).day != 1:
+            raise ValueError("as_of_date must be the last day of a month (e.g. 2026-10-31)")
+        return self

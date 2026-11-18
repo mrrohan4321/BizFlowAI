@@ -88,3 +88,32 @@ class World:
 @pytest.fixture
 def world():
     return World()
+
+
+# ---------- helpers for analytics / forecast / assistant tests ----------
+def add_payment(world, business_id, invoice_id, amount, on):
+    with world.get_cursor() as cur:
+        cur.execute("INSERT INTO payments (business_id, invoice_id, amount, payment_date) VALUES (%s,%s,%s,%s)",
+                    (business_id, invoice_id, amount, on))
+
+
+def add_expense(world, business_id, amount, on, paid_on=None, category="rent"):
+    with world.get_cursor() as cur:
+        cur.execute("INSERT INTO expenses (business_id, category, amount, expense_date, payment_status, paid_date) "
+                    "VALUES (%s,%s,%s,%s,%s,%s)",
+                    (business_id, category, amount, on, "paid" if paid_on else "unpaid", paid_on))
+
+
+def set_opening(world, business_id, amount="100000.00", as_of="2026-10-31"):
+    with world.get_cursor() as cur:
+        cur.execute("INSERT INTO opening_cash_balances (business_id, amount, as_of_date) VALUES (%s,%s,%s)",
+                    (business_id, amount, as_of))
+
+
+def known_answer(world, business_id):
+    """INV-102 30k unpaid | INV-103 20k with 5k paid | PUR-201 20k unpaid => receivables 45k, payables 20k."""
+    i102 = world.invoice(business_id, "INV-102", "sales", "30000.00", due="2026-11-10")
+    i103 = world.invoice(business_id, "INV-103", "sales", "20000.00", due="2026-11-25")
+    p201 = world.invoice(business_id, "PUR-201", "purchase", "20000.00", due="2026-12-01")
+    add_payment(world, business_id, i103, "5000.00", "2026-11-05")
+    return i102, i103, p201
