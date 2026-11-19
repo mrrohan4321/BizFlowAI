@@ -116,7 +116,11 @@ Never commit `.env`.
 
 ## 8. Deployment
 
-Backend is deployed on Render using [render.yaml](render.yaml) (free plan, Singapore). The start command runs
+Backend is deployed on Render using [render.yaml](render.yaml) (free plan, Singapore).
+
+- **Live API / Swagger:** https://bizflow-backend-2onh.onrender.com/docs
+- Health: https://bizflow-backend-2onh.onrender.com/api/health
+- Frontend developers can use this URL as `VITE_API_URL` without running the backend locally. The start command runs
 migrations automatically, then starts uvicorn. Health check: `GET /api/health`.
 After deploying, run `python backend/scripts/smoke_test.py` to verify everything end to end.
 Details: [backend/README.md](backend/README.md#deployment-render).

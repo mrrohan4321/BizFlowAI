@@ -11,7 +11,7 @@ python backend/scripts/smoke_test.py --skip-ai       # skip assistant + extracti
 BIZFLOW_API=http://localhost:8000 python backend/scripts/smoke_test.py
 ```
 
-Optional env vars: `BIZFLOW_API` (default: the Render URL inside the script - change `DEFAULT_API` if the service is renamed),
+Optional env vars: `BIZFLOW_API` (default: `https://bizflow-backend-2onh.onrender.com`, set inside the script - change `DEFAULT_API` if the service is renamed),
 `BIZFLOW_TOKEN` (skip login), `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `BIZFLOW_EMAIL`.
 
 Steps: health (DB connected) -> summary (compares with demo known answer 45,000 / 20,000) -> overdue -> invoices -> forecast ->

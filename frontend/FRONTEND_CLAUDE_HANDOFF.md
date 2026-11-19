@@ -32,6 +32,9 @@ Do not modify `backend/`, `ai_ml/` or `database/`. If you believe the API needs 
 React + Vite (JavaScript is fine; TypeScript optional), Tailwind CSS, react-router-dom, axios, recharts, `@supabase/supabase-js`.
 Do not add heavy UI frameworks. Keep dependencies minimal.
 
+Deployed backend (already live): API base `https://bizflow-backend-2onh.onrender.com`, Swagger `https://bizflow-backend-2onh.onrender.com/docs`, health `https://bizflow-backend-2onh.onrender.com/api/health`.
+Use it as `VITE_API_URL` unless a local backend is running (the free Render plan can take ~1 minute to wake up on the first request).
+
 Environment variables (Vite): `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`. Provide `frontend/.env.example`
 (names only). Never hard-code URLs or keys. Never use `GROQ_API_KEY`, `DATABASE_URL` or the JWT secret in the frontend.
 
@@ -99,7 +102,7 @@ then the pages, then shared components. Screens (details in `frontend/README.md`
 # 6. TESTING AND VERIFICATION
 
 1. `npm run build` must pass with no errors; `npm run lint` if configured.
-2. Run the backend locally (`cd backend && uvicorn app.main:app --reload`) or use the deployed URL, log in as the seeded demo user and verify:
+2. Use the deployed backend URL above (or run it locally: `cd backend && uvicorn app.main:app --reload`), log in as the seeded demo user and verify:
    - Dashboard shows receivables **45,000** and payables **20,000** (demo seed "Sen Electricals").
    - Recording a 10,000 payment on INV-102 makes receivables **35,000**.
    - Uploading `sample_data/invoices/sales_INV-103_total_mismatch.png` shows a validation warning.

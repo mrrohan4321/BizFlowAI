@@ -208,6 +208,8 @@ Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`.
 
 ## 9. Deployment (Render)
 
+**Live:** https://bizflow-backend-2onh.onrender.com - Swagger at `/docs`, health at `/api/health`. Frontend uses this as `VITE_API_URL`.
+
 - Blueprint: `../render.yaml` (web service, Python 3.12.7, free plan, Singapore).
 - Build: `pip install -r backend/requirements.txt`. Start: `cd backend && python -m app.db.migrate && uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
 - Set these in the Render dashboard (they are `sync: false`): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (if HS256),

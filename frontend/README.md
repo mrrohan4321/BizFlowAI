@@ -13,7 +13,7 @@ The backend, database and AI/ML parts are finished, tested and deployed - the fr
 | [../README.md](../README.md) | product flow, key money rules, setup |
 | [../backend/README.md](../backend/README.md) | **the full API reference**: every endpoint, request/response, error codes |
 | [../API-notes.md](../API-notes.md) | the shared contract (agree before changing) |
-| `http://localhost:8000/docs` (or the Render URL + `/docs`) | live Swagger - try calls, see real JSON |
+| **https://bizflow-backend-2onh.onrender.com/docs** | live Swagger of the DEPLOYED backend - try calls, see real JSON (no local backend needed). Local: `http://localhost:8000/docs` |
 | [../sample_data/README.md](../sample_data/README.md) | invoices to use in the upload demo |
 
 ## 2. Create the app
@@ -30,12 +30,26 @@ npm install tailwindcss @tailwindcss/vite recharts axios react-router-dom @supab
 ### Environment (`frontend/.env`, never commit)
 
 ```env
-VITE_API_URL=http://localhost:8000          # or the Render URL
+VITE_API_URL=https://bizflow-backend-2onh.onrender.com   # deployed backend (use this if you do not run the backend locally)
+# VITE_API_URL=http://localhost:8000     # local backend
 VITE_SUPABASE_URL=https://xxxx.supabase.co
 VITE_SUPABASE_ANON_KEY=<anon/publishable key>   # public key only. NEVER put GROQ_API_KEY, DATABASE_URL or the JWT secret here
 ```
 Add `frontend/.env.example` with the names only. The backend `ALLOWED_ORIGINS` must contain your dev/prod frontend URL
 (`http://localhost:5173` is the default) or every call fails with a CORS error.
+
+## 2b. Deployed backend (use this, no setup needed)
+
+| What | URL |
+|---|---|
+| API base (`VITE_API_URL`) | `https://bizflow-backend-2onh.onrender.com` |
+| Swagger UI | `https://bizflow-backend-2onh.onrender.com/docs` |
+| Health check | `https://bizflow-backend-2onh.onrender.com/api/health` |
+
+Swagger: click **Authorize**, paste a Supabase `access_token` (see root README, "Getting a token for Swagger"), then try endpoints.
+Render free plan: the first request after idle can take ~1 minute (server waking up). The deployed `ALLOWED_ORIGINS` must include your
+frontend URL - ask the backend owner to add `http://localhost:5173` (and the deployed frontend URL) in the Render dashboard if you see a CORS error.
+The deployed database is the same Supabase DB as the demo seed, so use the seeded demo user.
 
 ## 3. How the frontend talks to the system
 
