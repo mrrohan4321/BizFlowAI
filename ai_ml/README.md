@@ -28,6 +28,11 @@ The module is independent of the database and frontend.
 
 The backend retrieves authorized business data and supplies it to the AI/ML functions.
 
+> **Status: complete and integrated.** The FastAPI backend (`backend/`) already calls this module for every
+> feature (see section 11 for the exact call map). The brief that was used to build that backend is
+> [BACKEND_CLAUDE_HANDOFF.md](BACKEND_CLAUDE_HANDOFF.md). The frontend never talks to this module directly;
+> it only uses the backend API ([../backend/README.md](../backend/README.md)).
+
 ## 2. Architecture
 
 ```text
@@ -51,10 +56,10 @@ AI/ML Module
 Invoice Processing    Financial Analysis
    |                       |
    v                       v
-OCR                   Python Metrics
+OCR                    Python Metrics
    |                       |
    v                       v
-Groq Extraction       Forecasting
+Groq Extraction        Forecasting
    |                       |
    v                       |
 Pydantic Validation        |
@@ -88,6 +93,9 @@ Pydantic Validation        |
 ai_ml/
 ├── __init__.py
 ├── README.md
+├── BACKEND_CLAUDE_HANDOFF.md   brief used to build the backend around this module
+├── requirements.txt            runtime dependencies (pinned)
+├── requirements-dev.txt        runtime + pytest
 ├── .gitignore
 ├── config.py
 ├── schemas.py
@@ -99,6 +107,8 @@ ai_ml/
 ├── assistant_tools.py
 ├── assistant.py
 └── tests/
+    ├── fixtures/
+    │   └── messy_invoice_scenarios.json
     ├── test_config.py
     ├── test_schemas.py
     ├── test_ocr.py
@@ -107,7 +117,8 @@ ai_ml/
     ├── test_finance_metrics.py
     ├── test_forecasting.py
     ├── test_assistant_tools.py
-    └── test_assistant.py
+    ├── test_assistant.py
+    └── test_messy_invoice_dataset.py
 ```
 
 ### Module responsibilities
@@ -123,6 +134,8 @@ ai_ml/
 | `forecasting.py` | Moving-average forecasting |
 | `assistant_tools.py` | Approved deterministic assistant tools |
 | `assistant.py` | Natural-language financial assistant |
+| `tests/fixtures/messy_invoice_scenarios.json` | Synthetic invoice test scenarios |
+| `tests/test_messy_invoice_dataset.py` | Tests for the synthetic invoice dataset |
 
 ## 4. Technology stack
 
@@ -150,23 +163,20 @@ Run commands from the project root.
 
 ### Install dependencies
 
-Install the project's backend dependencies:
+Backend + AI/ML together (normal case - `backend/requirements.txt` already includes `ai_ml/requirements.txt`):
 
-```powershell
+```bash
 pip install -r backend/requirements.txt
 ```
 
-The AI/ML module additionally requires RapidOCR and PyMuPDF.
+AI/ML module on its own (no backend), with test tools:
 
-Install the tested versions:
-
-```powershell
-pip install rapidocr==3.10.0 PyMuPDF==2.1
+```bash
+pip install -r ai_ml/requirements-dev.txt
 ```
 
-Other shared dependencies are already included in the backend requirements.
-
-Use the project's tested Python environment and dependency versions.
+`ai_ml/requirements.txt` pins: `groq`, `pydantic`, `python-dotenv`, `rapidocr`, `PyMuPDF`, `Pillow`.
+Use Python 3.12 and the pinned versions.
 
 ### Environment variables
 
@@ -189,7 +199,8 @@ The configuration module loads environment variables from:
 1. Project root `.env`
 2. `ai_ml/.env`
 
-Existing environment variables take priority.
+Existing environment variables take priority. When the backend runs, `backend/app/config.py` loads the root `.env`
+before importing this module, so one `.env` file configures both.
 
 The Groq API key is required when a Groq-powered operation executes, not merely when importing the package.
 
@@ -240,7 +251,7 @@ Main function:
 from ai_ml.invoice_extraction import extract_invoice
 
 result = extract_invoice(
-    "sample_data/invoices/sample_invoice.png"
+    "sample_data/invoices/sales_INV-102_clean.png"
 )
 
 print(result.model_dump())
@@ -408,6 +419,8 @@ File: `forecasting.py`
 
 The forecasting module uses a recent-month moving-average baseline.
 
+By default, it uses up to **12 recent historical months** to calculate average income and outflows.
+
 Main function:
 
 ```python
@@ -417,7 +430,7 @@ forecast = get_forecast(
     monthly_history=monthly_history,
     opening_cash=50000,
     forecast_months=3,
-    window=3,
+    window=12,
 )
 ```
 
@@ -428,7 +441,9 @@ Arguments:
 | `monthly_history` | Historical monthly income and outflows |
 | `opening_cash` | Actual opening cash balance |
 | `forecast_months` | Number of future months |
-| `window` | Number of recent months used for averages |
+| `window` | Number of recent months used for averages; default is 12 |
+
+If fewer than 12 historical months are available, the forecasting function uses all available months rather than requiring 12 months of data.
 
 The forecast estimates future:
 
@@ -444,6 +459,8 @@ The result includes forecast periods, assumptions, the method used, and closing 
 - Forecast quality depends on the quality and length of historical data.
 - The backend must provide the actual opening cash balance.
 - Missing opening cash must not be silently treated as a verified zero balance.
+- The AI/ML module cannot generate missing real historical financial records.
+- The backend must supply the available historical financial data.
 - Forecasts must be presented as estimates, not guaranteed outcomes.
 
 ## 10. Financial assistant
@@ -496,7 +513,10 @@ The LLM does not execute SQL or independently calculate financial totals.
 | `opening_cash` | Forecast | Actual opening cash balance |
 | `today` | Optional | Date override for overdue calculations |
 | `forecast_months` | Optional | Forecast horizon, default 3 |
-| `forecast_window` | Optional | Moving-average window, default 3 |
+| `forecast_window` | Optional | Moving-average window, default 12 historical months |
+
+The backend's `GET /api/forecast` endpoint uses `window=3` by default (not 12) so that businesses with only a few months of
+history still get an estimate; the assistant path uses the `ai_ml` default.
 
 The current assistant does not independently expose an expense-specific tool. The `expenses` parameter is accepted but is not currently passed into the five registered assistant tools.
 
@@ -560,6 +580,25 @@ These responsibilities belong to the backend and frontend.
 
 **Business isolation must be enforced by the backend, not by the LLM.**
 
+### How the backend calls this module (call map)
+
+| Backend feature | `ai_ml` function used |
+|---|---|
+| `POST /api/invoices/extract` | `invoice_extraction.extract_invoice()` |
+| `POST /api/invoices`, `PATCH /api/invoices/{id}` (re-validation) | `schemas.InvoiceFields`, `validation.validate_invoice()` |
+| invoice `amount_paid` / `outstanding_amount` / `status` | `finance_metrics.money()`, `outstanding()`, `invoice_status()` |
+| `GET /api/analytics/summary` | `finance_metrics.calculate_business_summary()` |
+| `GET /api/analytics/overdue` | `assistant_tools.get_overdue_invoices_tool()` |
+| `GET /api/analytics/monthly` | `assistant_tools.get_monthly_performance()` |
+| `GET /api/forecast` | `forecasting.get_forecast()` |
+| `POST /api/assistant/chat` | `assistant.answer_finance_question()` |
+
+Data the backend passes in: invoices (`id, business_id, invoice_number, invoice_type, party_name, invoice_date, due_date,
+total_amount`), payments (`business_id, invoice_id, amount, payment_date`), expenses, and `monthly_history`
+(`[{month, income, outflows}]` built from actual cash only). Opening cash comes from the `opening_cash_balances` table.
+
+**If you change a function signature or return shape here, update `backend/app/services/` and its tests in the same change.**
+
 ## 12. Security considerations
 
 - Keep Groq API credentials in environment variables.
@@ -574,16 +613,28 @@ These responsibilities belong to the backend and frontend.
 
 ## 13. Testing
 
-Run tests from the project root:
+Run tests from the project root (no database, no API key needed - Groq is mocked):
 
-```powershell
-python -m pytest .\ai_ml\tests -v
+```bash
+python -m pytest ai_ml/tests -v          # Windows PowerShell: python -m pytest .\ai_ml\tests -v
 ```
 
 Run the complete suite quietly:
 
 ```powershell
 python -m pytest .\ai_ml\tests -q
+```
+
+Run only the synthetic invoice dataset tests:
+
+```powershell
+python -m pytest .\ai_ml\tests\test_messy_invoice_dataset.py -v
+```
+
+Run forecasting tests:
+
+```powershell
+python -m pytest .\ai_ml\tests\test_forecasting.py -v
 ```
 
 Compile the module:
@@ -598,6 +649,27 @@ Check whitespace errors:
 git diff --check
 ```
 
+### Synthetic invoice dataset
+
+The test fixture `tests/fixtures/messy_invoice_scenarios.json` contains 10 synthetic invoice scenarios designed to exercise invoice schema parsing and deterministic validation.
+
+The scenarios cover:
+
+1. Valid sales invoice.
+2. Missing invoice number.
+3. Invalid GSTIN format.
+4. Incorrect invoice total.
+5. CGST and SGST mismatch.
+6. IGST and CGST used together.
+7. Due date before invoice date.
+8. Negative subtotal.
+9. Malformed monetary amount.
+10. Missing due date.
+
+The dataset tests check whether each scenario produces the expected schema error or validation issues.
+
+These are synthetic test cases, not real customer invoices. They help verify how the module handles both ordinary and problematic invoice data.
+
 The AI/ML module has been tested with unit tests and live Groq/OCR integration checks.
 
 ## 14. Known limitations
@@ -606,6 +678,7 @@ The AI/ML module has been tested with unit tests and live Groq/OCR integration c
 - Extracted values require human review.
 - Invoice validation is deterministic but does not verify invoices against government databases.
 - Forecasting uses a moving-average baseline and is not a guarantee of future cash flow.
+- Forecasting can use up to 12 months of supplied history; it cannot create missing historical records.
 - Assistant answers depend on the accuracy of backend-supplied records.
 - Currency display must be based on explicitly supplied currency information.
 - The current assistant supports five registered financial tools.

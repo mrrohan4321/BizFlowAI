@@ -13,7 +13,7 @@
 
 DO $$
 DECLARE
-  demo_user UUID := '00000000-0000-0000-0000-000000000000';   -- <<< REPLACE ME
+  demo_user UUID := '134e1685-7d75-4747-8d26-a629176e5d41';   -- <<< REPLACE ME
   bid UUID;
   inv UUID;
   m INT;
