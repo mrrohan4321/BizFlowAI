@@ -250,3 +250,39 @@ def test_forecast_accepts_date_objects():
 def test_forecast_rejects_invalid_forecast_month_count():
     with pytest.raises(ValueError):
         get_forecast([], forecast_months=1.5)
+
+
+# --------------------------------------------------
+# 12-month forecasting tests
+# --------------------------------------------------
+
+def test_default_forecast_uses_up_to_12_months():
+    history = [
+        {
+            "month": f"{year}-{month:02d}",
+            "income": 10000 + index * 1000,
+            "outflows": 5000 + index * 500,
+        }
+        for index, (year, month) in enumerate(
+            [
+                (2025, 11), (2025, 12),
+                (2026, 1), (2026, 2),
+                (2026, 3), (2026, 4),
+                (2026, 5), (2026, 6),
+                (2026, 7), (2026, 8),
+                (2026, 9), (2026, 10),
+            ]
+        )
+    ]
+
+    result = get_forecast(
+        history,
+        opening_cash=100000,
+        forecast_months=1,
+    )
+
+    assert result["months_of_history_used"] == 12
+    assert result["method"] == "12-month moving average"
+    assert result["periods"] == ["2026-11"]
+    assert result["values"][0]["predicted_income"] == 15500
+    assert result["values"][0]["predicted_outflows"] == 7750

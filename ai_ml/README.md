@@ -28,11 +28,6 @@ The module is independent of the database and frontend.
 
 The backend retrieves authorized business data and supplies it to the AI/ML functions.
 
-> **Status: complete and integrated.** The FastAPI backend (`backend/`) already calls this module for every
-> feature (see section 11 for the exact call map). The brief that was used to build that backend is
-> [BACKEND_CLAUDE_HANDOFF.md](BACKEND_CLAUDE_HANDOFF.md). The frontend never talks to this module directly;
-> it only uses the backend API ([../backend/README.md](../backend/README.md)).
-
 ## 2. Architecture
 
 ```text
@@ -93,9 +88,6 @@ Pydantic Validation        |
 ai_ml/
 ├── __init__.py
 ├── README.md
-├── BACKEND_CLAUDE_HANDOFF.md   brief used to build the backend around this module
-├── requirements.txt            runtime dependencies (pinned)
-├── requirements-dev.txt        runtime + pytest
 ├── .gitignore
 ├── config.py
 ├── schemas.py
@@ -163,20 +155,23 @@ Run commands from the project root.
 
 ### Install dependencies
 
-Backend + AI/ML together (normal case - `backend/requirements.txt` already includes `ai_ml/requirements.txt`):
+Install the project's backend dependencies:
 
-```bash
+```powershell
 pip install -r backend/requirements.txt
 ```
 
-AI/ML module on its own (no backend), with test tools:
+The AI/ML module additionally requires RapidOCR and PyMuPDF.
 
-```bash
-pip install -r ai_ml/requirements-dev.txt
+Install the tested versions:
+
+```powershell
+pip install rapidocr==3.10.0 PyMuPDF==2.1
 ```
 
-`ai_ml/requirements.txt` pins: `groq`, `pydantic`, `python-dotenv`, `rapidocr`, `PyMuPDF`, `Pillow`.
-Use Python 3.12 and the pinned versions.
+Other shared dependencies are already included in the backend requirements.
+
+Use the project's tested Python environment and dependency versions.
 
 ### Environment variables
 
@@ -199,8 +194,7 @@ The configuration module loads environment variables from:
 1. Project root `.env`
 2. `ai_ml/.env`
 
-Existing environment variables take priority. When the backend runs, `backend/app/config.py` loads the root `.env`
-before importing this module, so one `.env` file configures both.
+Existing environment variables take priority.
 
 The Groq API key is required when a Groq-powered operation executes, not merely when importing the package.
 
@@ -251,7 +245,7 @@ Main function:
 from ai_ml.invoice_extraction import extract_invoice
 
 result = extract_invoice(
-    "sample_data/invoices/sales_INV-102_clean.png"
+    "sample_data/invoices/sample_invoice.png"
 )
 
 print(result.model_dump())
@@ -515,9 +509,6 @@ The LLM does not execute SQL or independently calculate financial totals.
 | `forecast_months` | Optional | Forecast horizon, default 3 |
 | `forecast_window` | Optional | Moving-average window, default 12 historical months |
 
-The backend's `GET /api/forecast` endpoint uses `window=3` by default (not 12) so that businesses with only a few months of
-history still get an estimate; the assistant path uses the `ai_ml` default.
-
 The current assistant does not independently expose an expense-specific tool. The `expenses` parameter is accepted but is not currently passed into the five registered assistant tools.
 
 ### Backend integration example
@@ -580,25 +571,6 @@ These responsibilities belong to the backend and frontend.
 
 **Business isolation must be enforced by the backend, not by the LLM.**
 
-### How the backend calls this module (call map)
-
-| Backend feature | `ai_ml` function used |
-|---|---|
-| `POST /api/invoices/extract` | `invoice_extraction.extract_invoice()` |
-| `POST /api/invoices`, `PATCH /api/invoices/{id}` (re-validation) | `schemas.InvoiceFields`, `validation.validate_invoice()` |
-| invoice `amount_paid` / `outstanding_amount` / `status` | `finance_metrics.money()`, `outstanding()`, `invoice_status()` |
-| `GET /api/analytics/summary` | `finance_metrics.calculate_business_summary()` |
-| `GET /api/analytics/overdue` | `assistant_tools.get_overdue_invoices_tool()` |
-| `GET /api/analytics/monthly` | `assistant_tools.get_monthly_performance()` |
-| `GET /api/forecast` | `forecasting.get_forecast()` |
-| `POST /api/assistant/chat` | `assistant.answer_finance_question()` |
-
-Data the backend passes in: invoices (`id, business_id, invoice_number, invoice_type, party_name, invoice_date, due_date,
-total_amount`), payments (`business_id, invoice_id, amount, payment_date`), expenses, and `monthly_history`
-(`[{month, income, outflows}]` built from actual cash only). Opening cash comes from the `opening_cash_balances` table.
-
-**If you change a function signature or return shape here, update `backend/app/services/` and its tests in the same change.**
-
 ## 12. Security considerations
 
 - Keep Groq API credentials in environment variables.
@@ -613,10 +585,10 @@ total_amount`), payments (`business_id, invoice_id, amount, payment_date`), expe
 
 ## 13. Testing
 
-Run tests from the project root (no database, no API key needed - Groq is mocked):
+Run tests from the project root:
 
-```bash
-python -m pytest ai_ml/tests -v          # Windows PowerShell: python -m pytest .\ai_ml\tests -v
+```powershell
+python -m pytest .\ai_ml\tests -v
 ```
 
 Run the complete suite quietly:

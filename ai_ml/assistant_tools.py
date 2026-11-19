@@ -234,7 +234,7 @@ def get_cash_forecast(
     monthly_history: list[dict],
     opening_cash: float,
     forecast_months: int = 3,
-    window: int = 3,
+    window: int = 12,
 ) -> dict:
     """Generate a cash-flow forecast for one business."""
     business_history = _get_business_history(
