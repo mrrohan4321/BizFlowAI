@@ -33,8 +33,10 @@ ALTER TABLE invoices
     CHECK (review_status IN ('confirmed','needs_review')),
   ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
 
-ALTER TABLE invoices
-  ADD CONSTRAINT invoices_total_nonneg CHECK (total_amount >= 0) NOT VALID;
+DO $$ BEGIN
+  ALTER TABLE invoices ADD CONSTRAINT invoices_total_nonneg CHECK (total_amount >= 0) NOT VALID;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- One invoice number per business per type (a sales and a purchase invoice
 -- may legitimately share a number).
@@ -59,9 +61,11 @@ ALTER TABLE expenses
   ADD COLUMN IF NOT EXISTS paid_date DATE,
   ADD COLUMN IF NOT EXISTS notes TEXT,
   ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
-ALTER TABLE expenses
-  ADD CONSTRAINT expenses_paid_has_date
-  CHECK (payment_status <> 'paid' OR paid_date IS NOT NULL);
+DO $$ BEGIN
+  ALTER TABLE expenses ADD CONSTRAINT expenses_paid_has_date
+    CHECK (payment_status <> 'paid' OR paid_date IS NOT NULL);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 CREATE INDEX IF NOT EXISTS idx_expenses_business_date ON expenses (business_id, expense_date);
 
 -- 5. Opening cash balance (never assumed to be zero).
