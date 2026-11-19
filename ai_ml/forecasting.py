@@ -82,7 +82,7 @@ def _normalize_month(value: Any) -> date:
 
 def baseline_forecast(
     monthly_values: list[float],
-    window: int = 3,
+    window: int = 12,
 ) -> float:
     """Predict the next month using the recent-month average."""
 
@@ -112,7 +112,7 @@ def get_forecast(
     monthly_history: list[dict],
     opening_cash: float = 0,
     forecast_months: int = 3,
-    window: int = 3,
+    window: int = 12,
 ) -> dict:
     """
     Generate an explainable cash-flow forecast.
@@ -124,6 +124,9 @@ def get_forecast(
 
     opening_cash is the cash balance at the end of the last
     historical month. It may be negative, for example, an overdraft.
+
+    Uses up to 12 recent historical months by default.
+    If fewer than 12 months are available, all available months are used.
 
     Duplicate historical months are rejected to prevent distorted averages.
     """

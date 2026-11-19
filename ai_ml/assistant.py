@@ -168,7 +168,7 @@ def _build_tool_arguments(
     opening_cash: float | None = None,
     today: date | None = None,
     forecast_months: int = 3,
-    forecast_window: int = 3,
+    forecast_window: int = 12,
 ) -> dict[str, Any]:
     """Build fixed arguments for an approved financial tool."""
 
@@ -293,7 +293,7 @@ def answer_finance_question(
     opening_cash: float | None = None,
     today: date | None = None,
     forecast_months: int = 3,
-    forecast_window: int = 3,
+    forecast_window: int = 12,
 ) -> AssistantResponse:
     """Answer a business finance question using approved Python tools.
 

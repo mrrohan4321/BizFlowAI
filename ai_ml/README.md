@@ -51,10 +51,10 @@ AI/ML Module
 Invoice Processing    Financial Analysis
    |                       |
    v                       v
-OCR                   Python Metrics
+OCR                    Python Metrics
    |                       |
    v                       v
-Groq Extraction       Forecasting
+Groq Extraction        Forecasting
    |                       |
    v                       |
 Pydantic Validation        |
@@ -99,6 +99,8 @@ ai_ml/
 ├── assistant_tools.py
 ├── assistant.py
 └── tests/
+    ├── fixtures/
+    │   └── messy_invoice_scenarios.json
     ├── test_config.py
     ├── test_schemas.py
     ├── test_ocr.py
@@ -107,7 +109,8 @@ ai_ml/
     ├── test_finance_metrics.py
     ├── test_forecasting.py
     ├── test_assistant_tools.py
-    └── test_assistant.py
+    ├── test_assistant.py
+    └── test_messy_invoice_dataset.py
 ```
 
 ### Module responsibilities
@@ -123,6 +126,8 @@ ai_ml/
 | `forecasting.py` | Moving-average forecasting |
 | `assistant_tools.py` | Approved deterministic assistant tools |
 | `assistant.py` | Natural-language financial assistant |
+| `tests/fixtures/messy_invoice_scenarios.json` | Synthetic invoice test scenarios |
+| `tests/test_messy_invoice_dataset.py` | Tests for the synthetic invoice dataset |
 
 ## 4. Technology stack
 
@@ -408,6 +413,8 @@ File: `forecasting.py`
 
 The forecasting module uses a recent-month moving-average baseline.
 
+By default, it uses up to **12 recent historical months** to calculate average income and outflows.
+
 Main function:
 
 ```python
@@ -417,7 +424,7 @@ forecast = get_forecast(
     monthly_history=monthly_history,
     opening_cash=50000,
     forecast_months=3,
-    window=3,
+    window=12,
 )
 ```
 
@@ -428,7 +435,9 @@ Arguments:
 | `monthly_history` | Historical monthly income and outflows |
 | `opening_cash` | Actual opening cash balance |
 | `forecast_months` | Number of future months |
-| `window` | Number of recent months used for averages |
+| `window` | Number of recent months used for averages; default is 12 |
+
+If fewer than 12 historical months are available, the forecasting function uses all available months rather than requiring 12 months of data.
 
 The forecast estimates future:
 
@@ -444,6 +453,8 @@ The result includes forecast periods, assumptions, the method used, and closing 
 - Forecast quality depends on the quality and length of historical data.
 - The backend must provide the actual opening cash balance.
 - Missing opening cash must not be silently treated as a verified zero balance.
+- The AI/ML module cannot generate missing real historical financial records.
+- The backend must supply the available historical financial data.
 - Forecasts must be presented as estimates, not guaranteed outcomes.
 
 ## 10. Financial assistant
@@ -496,7 +507,7 @@ The LLM does not execute SQL or independently calculate financial totals.
 | `opening_cash` | Forecast | Actual opening cash balance |
 | `today` | Optional | Date override for overdue calculations |
 | `forecast_months` | Optional | Forecast horizon, default 3 |
-| `forecast_window` | Optional | Moving-average window, default 3 |
+| `forecast_window` | Optional | Moving-average window, default 12 historical months |
 
 The current assistant does not independently expose an expense-specific tool. The `expenses` parameter is accepted but is not currently passed into the five registered assistant tools.
 
@@ -586,6 +597,18 @@ Run the complete suite quietly:
 python -m pytest .\ai_ml\tests -q
 ```
 
+Run only the synthetic invoice dataset tests:
+
+```powershell
+python -m pytest .\ai_ml\tests\test_messy_invoice_dataset.py -v
+```
+
+Run forecasting tests:
+
+```powershell
+python -m pytest .\ai_ml\tests\test_forecasting.py -v
+```
+
 Compile the module:
 
 ```powershell
@@ -598,6 +621,27 @@ Check whitespace errors:
 git diff --check
 ```
 
+### Synthetic invoice dataset
+
+The test fixture `tests/fixtures/messy_invoice_scenarios.json` contains 10 synthetic invoice scenarios designed to exercise invoice schema parsing and deterministic validation.
+
+The scenarios cover:
+
+1. Valid sales invoice.
+2. Missing invoice number.
+3. Invalid GSTIN format.
+4. Incorrect invoice total.
+5. CGST and SGST mismatch.
+6. IGST and CGST used together.
+7. Due date before invoice date.
+8. Negative subtotal.
+9. Malformed monetary amount.
+10. Missing due date.
+
+The dataset tests check whether each scenario produces the expected schema error or validation issues.
+
+These are synthetic test cases, not real customer invoices. They help verify how the module handles both ordinary and problematic invoice data.
+
 The AI/ML module has been tested with unit tests and live Groq/OCR integration checks.
 
 ## 14. Known limitations
@@ -606,6 +650,7 @@ The AI/ML module has been tested with unit tests and live Groq/OCR integration c
 - Extracted values require human review.
 - Invoice validation is deterministic but does not verify invoices against government databases.
 - Forecasting uses a moving-average baseline and is not a guarantee of future cash flow.
+- Forecasting can use up to 12 months of supplied history; it cannot create missing historical records.
 - Assistant answers depend on the accuracy of backend-supplied records.
 - Currency display must be based on explicitly supplied currency information.
 - The current assistant supports five registered financial tools.
