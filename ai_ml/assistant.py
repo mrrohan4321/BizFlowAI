@@ -283,6 +283,67 @@ def _make_answer(
     return answer.strip()
 
 
+def _fallback_answer(question: str) -> str:
+    """Handle greetings, capability questions, and unsupported requests."""
+    normalized = " ".join(
+        question.lower().strip().rstrip("?!.,").split()
+    )
+
+    # Handle common greetings.
+    greetings = {
+        "hi",
+        "hello",
+        "hey",
+        "hi there",
+        "hello there",
+        "hey there",
+        "good morning",
+        "good afternoon",
+        "good evening",
+    }
+
+    if normalized in greetings:
+        return (
+            "Hello! I'm BizFlowAI's finance assistant. "
+            "I can help you understand your business finances. "
+            "You can ask me about receivables, payables, overdue invoices, "
+            "monthly performance, or cash-flow forecasts."
+        )
+
+    # Handle questions about the assistant's capabilities.
+    help_phrases = (
+        "how can you help",
+        "how can u help",
+        "how can i use you",
+        "what can you do",
+        "what can u do",
+        "what do you do",
+        "what can i ask",
+        "your capabilities",
+        "can you help me",
+        "can u help me",
+    )
+
+    if any(phrase in normalized for phrase in help_phrases):
+        return (
+            "I can help you manage and understand your business finances. "
+            "Here are some things you can ask me:\n\n"
+            "1. Receivables: How much money do my customers owe me?\n"
+            "2. Payables: How much do I owe my suppliers?\n"
+            "3. Overdue invoices: Which customer invoices are overdue?\n"
+            "4. Monthly performance: How has my business performed recently?\n"
+            "5. Cash-flow forecast: What is my expected cash flow?"
+        )
+
+    # Politely redirect questions outside the assistant's scope.
+    return (
+        "I'm designed to help with business finance questions. "
+        "I can assist with receivables, payables, overdue invoices, "
+        "monthly financial performance, and cash-flow forecasts. "
+        "Please ask me something related to your business finances."
+    )
+
+
 def answer_finance_question(
     question: str,
     business_id: str,
@@ -333,20 +394,17 @@ def answer_finance_question(
         logger.exception("Groq API failed during tool selection.")
         return _service_unavailable_response(question)
 
+    # Step 2: Handle questions that do not require a financial tool.
     if tool_name is None:
         return AssistantResponse(
             question=question,
-            answer=(
-                "I can help with receivables, payables, overdue invoices, "
-                "monthly financial performance, and cash-flow forecasts. "
-                "Please ask a question related to one of these areas."
-            ),
+            answer=_fallback_answer(question),
             tool_used=None,
             data=None,
-            insufficient_data=True,
+            insufficient_data=False,
         )
 
-    # Step 2: Build arguments using data supplied by the backend.
+    # Step 3: Build arguments using data supplied by the backend.
     arguments = _build_tool_arguments(
         tool_name=tool_name,
         business_id=business_id,
@@ -360,7 +418,7 @@ def answer_finance_question(
         forecast_window=forecast_window,
     )
 
-    # Step 3: Execute only the approved Python function.
+    # Step 4: Execute only the approved Python function.
     tool_function = TOOLS[tool_name]
     tool_result = tool_function(**arguments)
 
@@ -370,7 +428,7 @@ def answer_finance_question(
     # Convert Decimal/date values into JSON-safe values for the response.
     safe_result = json.loads(json.dumps(tool_result, default=str))
 
-    # Step 4: Check whether the result indicates insufficient history.
+    # Step 5: Check whether the result indicates insufficient history.
     insufficient_data = (
         safe_result.get("insufficient_data", False) is True
     )
@@ -381,7 +439,14 @@ def answer_finance_question(
     ):
         insufficient_data = True
 
-    # Step 5: Ask Groq to explain the actual calculated result.
+    # A forecast with no historical data is also insufficient.
+    if (
+        tool_name == "get_cash_forecast"
+        and safe_result.get("method") == "insufficient_data"
+    ):
+        insufficient_data = True
+
+    # Step 6: Ask Groq to explain the actual calculated result.
     try:
         answer = _make_answer(
             client=client,

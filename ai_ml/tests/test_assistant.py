@@ -163,8 +163,90 @@ def test_unsupported_question(monkeypatch):
 
     assert result.tool_used is None
     assert result.data is None
-    assert result.insufficient_data is True
+    assert result.insufficient_data is False
     assert "receivables" in result.answer.lower()
+    assert len(fake_client.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "question,expected_text",
+    [
+        ("hi", "hello"),
+        ("hello", "hello"),
+        ("good morning", "hello"),
+    ],
+)
+def test_greetings_receive_a_friendly_response(
+    monkeypatch,
+    question,
+    expected_text,
+):
+    """Greetings should receive a friendly response, not a missing-data warning."""
+
+    fake_client = FakeGroqClient(
+        [json.dumps({"tool_name": None})]
+    )
+
+    monkeypatch.setattr(
+        assistant,
+        "_get_client",
+        lambda: fake_client,
+    )
+
+    result = assistant.answer_finance_question(
+        question=question,
+        business_id="business-123",
+    )
+
+    assert result.tool_used is None
+    assert result.data is None
+    assert result.insufficient_data is False
+    assert expected_text in result.answer.lower()
+    assert "receivables" in result.answer.lower()
+    assert len(fake_client.calls) == 1
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "How can u help me?",
+        "How can you help me?",
+        "What can you do?",
+        "What can I ask you?",
+    ],
+)
+def test_capability_questions_explain_assistant_features(
+    monkeypatch,
+    question,
+):
+    """Capability questions should explain the assistant's supported features."""
+
+    fake_client = FakeGroqClient(
+        [json.dumps({"tool_name": None})]
+    )
+
+    monkeypatch.setattr(
+        assistant,
+        "_get_client",
+        lambda: fake_client,
+    )
+
+    result = assistant.answer_finance_question(
+        question=question,
+        business_id="business-123",
+    )
+
+    assert result.tool_used is None
+    assert result.data is None
+    assert result.insufficient_data is False
+
+    answer = result.answer.lower()
+
+    assert "receivables" in answer
+    assert "payables" in answer
+    assert "overdue invoices" in answer
+    assert "cash-flow forecast" in answer
+
     assert len(fake_client.calls) == 1
 
 
@@ -250,6 +332,7 @@ def test_empty_business_id():
             business_id="   ",
         )
 
+
 class SimulatedGroqAPIError(Exception):
     """Fake Groq API error for testing."""
 
@@ -320,6 +403,7 @@ def test_groq_failure_during_answer_generation(monkeypatch):
     assert result.data is not None
     assert result.data["business_id"] == "business-123"
     assert "calculated successfully" in result.answer.lower()
+
 
 @pytest.mark.parametrize(
     "question,business_id",
@@ -410,5 +494,3 @@ def test_rejects_empty_groq_answer(monkeypatch):
             invoices=[],
             payments=[],
         )
-
-
