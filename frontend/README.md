@@ -1,7 +1,50 @@
 # Frontend (React + Vite + Tailwind)
 
-**Status: NOT STARTED.** This folder only contains empty `src/components`, `src/pages`, `src/services` placeholders.
-The backend, database and AI/ML parts are finished, tested and deployed - the frontend only has to *consume the API*.
+**Status: IMPLEMENTED (local build verified; authenticated live flows require demo credentials).**
+The React frontend includes login, overview, upload/review/confirm, invoices/payments, expenses, opening cash/forecast, and the assistant.
+
+## Start here — first-time frontend setup
+
+1. Install **Node.js 20.19+ or 22.12+** (Node 24 also works).
+2. Open a terminal inside `frontend/` and run `npm install`.
+3. Copy `.env.example` to `.env` and fill in the following values (ask your backend teammate for the Supabase project URL and **public anon/publishable key**):
+
+   ```env
+   VITE_API_URL=https://bizflow-backend-2onh.onrender.com
+   VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+   VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
+   ```
+
+4. Run `npm run dev` and open `http://localhost:5173`.
+5. Log in with the Supabase demo user already linked to Sen Electricals in `business_members`.
+
+**Do not** put the database password, JWT secret, or Groq key in `.env`. The backend owner must allow `http://localhost:5173` in `ALLOWED_ORIGINS` on Render.
+
+For production: `npm run build` generates `dist/`; deploy the folder on Vercel, Netlify or other static hosting. Configure the same three `VITE_` variables on the host, enable an SPA rewrite to `/index.html`, and have the backend owner allow your deployed HTTPS origin in `ALLOWED_ORIGINS`.
+
+### What is included
+
+| Page | API calls |
+|---|---|
+| Login | Supabase `signInWithPassword`, `getSession`, `signOut` |
+| Dashboard | `GET /api/analytics/summary`, `/monthly`, `/overdue` |
+| Upload & review | `POST /api/invoices/extract`, then `POST /api/invoices` only on user confirmation |
+| Invoices | `GET /api/invoices` with filters/pagination |
+| Invoice details | `GET/PATCH/DELETE /api/invoices/{id}`, `GET/POST /api/payments` |
+| Expenses | `GET/POST /api/expenses`, `PATCH /api/expenses/{id}` |
+| Cash flow | `GET/PUT /api/opening-cash`, `GET /api/forecast` |
+| Assistant | `POST /api/assistant/chat` |
+
+### Verification and limitations (20 November 2026)
+
+- Vite production compilation **passed**. The JS bundle currently reports a size warning; code-splitting is a future optimization.
+- Public deployed `/api/health` returned `{"status":"ok","database":true}`.
+- Authenticated demo flows could **not** be verified because no Supabase URL, public anon key, or demo login credentials were supplied. The UI must be tested after configuring them; do not treat the expected ₹45,000/₹20,000 or payment demo values as verified.
+- Dependency installation from the npm registry was blocked in the execution environment. The production compilation was run with compatible locally available node_modules. On your machine, use `npm install` with internet access.
+- The backend does not provide signup/business onboarding, invoice file download, or expense deletion. Ask the backend owner about these after the hackathon if needed.
+- Expense list uses up to 100 records; backend does not return a total for expense pagination.
+
+The remaining historical sections below are the original implementation brief; the instructions above describe the actual completed frontend.
 
 > Using Claude / an AI coding assistant? Give it [FRONTEND_CLAUDE_HANDOFF.md](FRONTEND_CLAUDE_HANDOFF.md) as the first prompt
 > (same idea as `ai_ml/BACKEND_CLAUDE_HANDOFF.md` that was used for the backend).
