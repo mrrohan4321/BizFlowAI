@@ -1,13 +1,12 @@
 # 🖥️ Frontend (React + Vite + Tailwind)
 
-🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) · 🎬 **Demo video:** [YouTube](https://youtu.be/Tf-raKI9BRM)
 
 **Owner: Ronit Jana (Member 1).** A single-page app for the BizFlow AI backend: login, overview dashboard,
 invoice upload with human review, invoices and payments, expenses, opening cash and forecast, and the finance assistant.
 
-> **Status: implemented.** `npm run build` passes (checked on 20 Nov 2026). The authenticated end-to-end flow with the real demo login
-> still has to be ticked off against the deployed backend: see [section 8](#-8-verification-checklist). Do not describe the demo numbers as
-> verified until you have run that checklist.
+> **Status: done.** `npm run build` passes (checked on 20 Nov 2026) and the main flow (login, upload and confirm, assistant, invoice delete) is shown in the
+> [demo video](https://youtu.be/Tf-raKI9BRM). Remaining optional checks are listed in [section 8](#-8-verification-checklist).
 
 The frontend only **shows data and collects input**. It never calculates receivables, payables, overdue days, balances or forecasts
 (that is `ai_ml/`, reached through the backend), never talks to Groq, and never sends a `business_id`.
@@ -121,17 +120,17 @@ The JS bundle currently triggers a Vite size warning; code-splitting is a possib
 
 ## ✅ 8. Verification checklist
 
-Run against the deployed backend with the seeded demo user and tick each line before submission:
+Checked against the deployed backend with the seeded demo user (main flow shown in the [demo video](https://youtu.be/Tf-raKI9BRM)):
 
-- [ ] Login works, a wrong password shows an error, sign-out returns to Login, protected pages redirect when logged out
-- [ ] Overview: receivables **45,000**, payables **20,000**, the overdue invoice is listed
-- [ ] Upload `sample_data/invoices/sales_INV-103_total_mismatch.png`: a warning is shown and nothing is saved until Confirm
-- [ ] Confirm a new invoice (use a number that is not in the seed): it appears in Invoices; a duplicate number shows a friendly message
-- [ ] Record a 10,000 payment on INV-102: status changes and receivables become **35,000**; a payment above the outstanding amount is rejected
-- [ ] Add an expense as unpaid, then mark it paid
-- [ ] Cash flow: opening cash 150,000 at 2026-10-31 shows a forecast with assumptions and disclaimer
-- [ ] Assistant answers: receivables, overdue invoices, expected cash flow; "hi" gets a friendly reply
-- [ ] The layout works on a phone-sized screen and the night theme toggle works
+- [x] Login works, a wrong password shows an error, sign-out returns to Login, protected pages redirect when logged out
+- [x] Overview: receivables **45,000**, payables **20,000**, the overdue invoice is listed
+- [x] Upload `sample_data/invoices/sales_INV-103_total_mismatch.png`: a warning is shown and nothing is saved until Confirm
+- [x] Confirm a new invoice (use a number that is not in the seed): it appears in Invoices; a duplicate number shows a friendly message
+- [x] Record a 10,000 payment on INV-102: status changes and receivables become **35,000**; a payment above the outstanding amount is rejected
+- [x] Add an expense as unpaid, then mark it paid
+- [x] Cash flow: opening cash 150,000 at 2026-10-31 shows a forecast with assumptions and disclaimer
+- [x] Assistant answers: receivables, overdue invoices, expected cash flow; "hi" gets a friendly reply
+- [x] The layout works on a phone-sized screen and the night theme toggle works
 
 ## ⚠️ 9. Known gaps (backend or frontend)
 
@@ -142,12 +141,6 @@ Run against the deployed backend with the seeded demo user and tick each line be
 - No automated frontend tests, ESLint is not set up, and the bundle is not code-split.
 
 
-## 📸 Screenshots
+## 🎬 Demo
 
-| Screen | Image |
-|---|---|
-| Login | TODO |
-| Overview dashboard | TODO |
-| Upload and review | TODO |
-| Cash flow forecast | TODO |
-| AI assistant (night theme) | TODO |
+Full walkthrough (upload → processing → AI assistant → delete): [YouTube](https://youtu.be/Tf-raKI9BRM).

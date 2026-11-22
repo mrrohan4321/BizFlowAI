@@ -1,6 +1,6 @@
 # 🧠 BizFlowAI — AI/ML Module
 
-🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) · 🎬 **Demo video:** [YouTube](https://youtu.be/Tf-raKI9BRM)
 
 **Owner: Rajdeep Panja (Member 3).** Integrated into the FastAPI backend by Rohan Adak (see the table at the end of section 10) and shown in the React app by Ronit Jana.
 

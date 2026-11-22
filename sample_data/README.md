@@ -1,6 +1,6 @@
 # 🗂️ Sample data (synthetic only - never commit real invoices)
 
-🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) · 🎬 **Demo video:** [YouTube](https://youtu.be/Tf-raKI9BRM)
 
 Shared by the whole team (used by the demo, the smoke test and the frontend checks).
 

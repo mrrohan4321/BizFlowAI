@@ -1,6 +1,6 @@
 # ⚙️ Backend (FastAPI)
 
-🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) · 🎬 **Demo video:** [YouTube](https://youtu.be/Tf-raKI9BRM)
 
 **Owner: Rohan Adak (Member 2).** Covers `backend/`, `database/` and the Render deployment (`../render.yaml`). Consumed by the React app in `../frontend/` (see [../frontend/README.md](../frontend/README.md)); wraps the `ai_ml/` module by Rajdeep Panja.
 
