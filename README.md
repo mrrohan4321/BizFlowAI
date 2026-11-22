@@ -2,7 +2,7 @@
 
 [![Live API](https://img.shields.io/badge/Live%20API-Render-46E3B7?logo=render&logoColor=white)](https://bizflow-backend-2onh.onrender.com/docs)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-mrrohan4321%2FBizFlowAI-blue?logo=github)](https://github.com/mrrohan4321/BizFlowAI)
-[![Live App](https://img.shields.io/badge/Live%20App-TODO-lightgrey)](#-live-application)
+[![Live App](https://img.shields.io/badge/Live%20App-TODO-lightgrey)]((https://biz-flow-ai-xi.vercel.app/))
 [![Demo Video](https://img.shields.io/badge/Demo-TODO-lightgrey?logo=youtube)](#-live-application)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
