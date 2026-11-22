@@ -1,4 +1,4 @@
-# services/
+# 🔌 services/
 
 The only place that talks to the outside world. Pages never call axios or Supabase directly.
 

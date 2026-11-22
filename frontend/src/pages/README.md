@@ -1,4 +1,4 @@
-# pages/
+# 📄 pages/
 
 One file per screen. Each page loads its data through `src/services/*`, shows loading / empty / error states, and renders values exactly as the API returns them.
 

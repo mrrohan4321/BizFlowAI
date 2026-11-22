@@ -1,10 +1,12 @@
-# Database (Supabase PostgreSQL)
+# 🗄️ Database (Supabase PostgreSQL)
+
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
 
 **Owner: Rohan Adak (Member 2).**
 
 Plain SQL, no ORM. The backend talks to it with psycopg2 (`backend/app/db/`).
 
-## Files
+## 📁 Files
 
 | File | Purpose |
 |---|---|
@@ -13,7 +15,7 @@ Plain SQL, no ORM. The backend talks to it with psycopg2 (`backend/app/db/`).
 | `migrations/002_enable_rls.sql` | Enables Row Level Security on every table (blocks the public Supabase anon key) |
 | `seed_demo.sql` | Fictional demo business "Sen Electricals" with known answers |
 
-## Apply the schema
+## 🛠️ Apply the schema
 
 ```bash
 cd backend && python -m app.db.migrate
@@ -24,7 +26,7 @@ in name order, **once each**. Render runs it on every deploy, so it is safe to r
 **Rules:** never edit a migration that has already been applied anywhere; add `003_*.sql` instead. Keep migrations additive
 (`IF NOT EXISTS`) and idempotent. Every new table also needs `ENABLE ROW LEVEL SECURITY` (a backend test checks this).
 
-## Tables
+## 🗄️ Tables
 
 | Table | Key columns / notes |
 |---|---|
@@ -41,7 +43,7 @@ in name order, **once each**. Render runs it on every deploy, so it is safe to r
 
 All money columns are `NUMERIC(14,2)`. Every business table has `business_id` and ON DELETE CASCADE from `businesses`.
 
-## Demo data
+## 🎬 Demo data
 
 1. Create a user in Supabase Auth and copy the **User UID**.
 2. Open `seed_demo.sql` and set `demo_user UUID := '...'` to that UID (the file currently contains the team's demo user UID; replace it if you use your own Supabase project or user).
@@ -57,7 +59,7 @@ Known answers after seeding (also checked by `backend/scripts/smoke_test.py`):
 | Receivables / payables | **45,000 / 20,000** (after a 10,000 payment on INV-102: receivables 35,000) |
 | History | Jun-Oct 2026 settled invoices, payments and paid expenses; opening cash 150,000 on 2026-10-31 |
 
-## Onboarding a new real user (no API for this yet)
+## 🔌 Onboarding a new real user (no API for this yet)
 
 ```sql
 INSERT INTO businesses (name, owner_user_id) VALUES ('My Shop', '<supabase user uid>') RETURNING id;
@@ -66,7 +68,7 @@ INSERT INTO business_members (business_id, user_id, role) VALUES ('<business id>
 Without the `business_members` row the user gets `403 no_business_access`. A proper "create my business" endpoint is a good
 next backend task (see backend/README.md, known limitations).
 
-## Supabase notes
+## ☁️ Supabase notes
 
 - Use the **connection pooler** string for `DATABASE_URL` on Render.
 - The backend connects as the database owner (bypasses RLS). The frontend must **never** query tables directly through the

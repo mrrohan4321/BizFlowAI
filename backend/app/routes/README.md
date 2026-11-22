@@ -1,4 +1,4 @@
-# routes/
+# 🛣️ routes/
 
 Thin FastAPI routers. They declare the URL, parameters and the auth dependency, then call a function in
 `services/`. No SQL and no money maths here.

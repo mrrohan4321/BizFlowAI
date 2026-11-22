@@ -1,4 +1,4 @@
-# db/
+# 🗄️ db/
 
 - `database.py`: `get_connection()` is one transaction (commit on success, rollback on error);
   `get_cursor()` wraps it for single queries. Rows come back as dicts (`RealDictCursor`).

@@ -1,16 +1,18 @@
-# Frontend (React + Vite + Tailwind)
+# 🖥️ Frontend (React + Vite + Tailwind)
+
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
 
 **Owner: Ronit Jana (Member 1).** A single-page app for the BizFlow AI backend: login, overview dashboard,
 invoice upload with human review, invoices and payments, expenses, opening cash and forecast, and the finance assistant.
 
 > **Status: implemented.** `npm run build` passes (checked on 20 Nov 2026). The authenticated end-to-end flow with the real demo login
-> still has to be ticked off against the deployed backend: see [section 8](#8-verification-checklist). Do not describe the demo numbers as
+> still has to be ticked off against the deployed backend: see [section 8](#-8-verification-checklist). Do not describe the demo numbers as
 > verified until you have run that checklist.
 
 The frontend only **shows data and collects input**. It never calculates receivables, payables, overdue days, balances or forecasts
 (that is `ai_ml/`, reached through the backend), never talks to Groq, and never sends a `business_id`.
 
-## 1. Run it
+## 🛠️ 1. Run it
 
 Requirements: **Node.js 20.19+ or 22.12+** (Node 24 also works).
 
@@ -37,7 +39,7 @@ HTTPS URL to `ALLOWED_ORIGINS` on Render, otherwise every request fails with a C
 Log in with the Supabase demo user linked to "Sen Electricals" (see [../database/README.md](../database/README.md)).
 Render's free plan sleeps: the first request can take up to a minute (the UI says "the server may be waking up").
 
-## 2. Scripts
+## 📜 2. Scripts
 
 | Command | What it does |
 |---|---|
@@ -48,7 +50,7 @@ Render's free plan sleeps: the first request can take up to a minute (the UI say
 `package.json` also lists `npm run lint`, but ESLint is not installed or configured, so it will not work yet.
 There are no automated frontend tests yet.
 
-## 3. Screens and the API calls they make
+## 🖥️ 3. Screens and the API calls they make
 
 | Route | Page file | Calls |
 |---|---|---|
@@ -64,7 +66,7 @@ There are no automated frontend tests yet.
 All routes except `/login` are behind an auth guard (`App.jsx`). Unknown paths redirect to `/`.
 The full API reference (bodies, responses, error codes) is in [../backend/README.md](../backend/README.md); the short contract is [../API-notes.md](../API-notes.md).
 
-## 4. Folder structure
+## 📁 4. Folder structure
 
 ```
 frontend/
@@ -82,7 +84,7 @@ frontend/
     └── pages/                      one file per screen                 -> pages/README.md
 ```
 
-## 5. How it talks to the backend
+## 🔗 5. How it talks to the backend
 
 ```
 Browser --Supabase JS--> Supabase Auth (login)  -> access_token
@@ -97,7 +99,7 @@ Browser --axios + Bearer access_token--> FastAPI backend --> Postgres / ai_ml / 
 - Optional multi-business support: `setBusinessId(id)` stores an id in `sessionStorage` and sends it as `X-Business-Id`. There is no business picker screen yet.
 - Money is displayed with `money()` in `components/UI.jsx` (Indian formatting, INR).
 
-## 6. Safety rules built into the UI
+## 🛡️ 6. Safety rules built into the UI
 
 1. **Never auto-save.** Extracted data goes into an editable review form; saving needs the explicit **Confirm** button, which sends `confirmed: true` (+ `extraction_id`).
 2. If extraction fails (`ai_extraction_failed`) the form is empty and the user types the invoice manually.
@@ -107,7 +109,7 @@ Browser --axios + Bearer access_token--> FastAPI backend --> Postgres / ai_ml / 
 6. Money from `extracted_fields` can arrive as text (for example `"1180.00"`); the form converts it to a number before saving.
 7. No secrets in the code; the access token is never logged or shown.
 
-## 7. Build and deploy
+## 🚀 7. Build and deploy
 
 ```bash
 npm run build      # outputs dist/
@@ -117,7 +119,7 @@ Host `dist/` on Vercel, Netlify or any static host. Set the same three `VITE_` v
 (`vercel.json` already contains it; other hosts need an equivalent "all paths -> /index.html" rule). Then give the deployed HTTPS URL to the backend owner for `ALLOWED_ORIGINS`.
 The JS bundle currently triggers a Vite size warning; code-splitting is a possible later optimisation.
 
-## 8. Verification checklist
+## ✅ 8. Verification checklist
 
 Run against the deployed backend with the seeded demo user and tick each line before submission:
 
@@ -131,10 +133,21 @@ Run against the deployed backend with the seeded demo user and tick each line be
 - [ ] Assistant answers: receivables, overdue invoices, expected cash flow; "hi" gets a friendly reply
 - [ ] The layout works on a phone-sized screen and the night theme toggle works
 
-## 9. Known gaps (backend or frontend)
+## ⚠️ 9. Known gaps (backend or frontend)
 
 - No sign-up / "create my business" endpoint: a new Supabase user gets `403 no_business_access` until a `business_members` row exists (done by SQL).
 - Uploaded invoice files cannot be downloaded again (the API only returns `has_file`).
 - The backend has no endpoint to delete payments or expenses; the expense list shows up to 100 records because the API returns no total for expenses.
 - The sidebar shows a fixed "My business" label (the API has no endpoint that returns the business name).
 - No automated frontend tests, ESLint is not set up, and the bundle is not code-split.
+
+
+## 📸 Screenshots
+
+| Screen | Image |
+|---|---|
+| Login | TODO |
+| Overview dashboard | TODO |
+| Upload and review | TODO |
+| Cash flow forecast | TODO |
+| AI assistant (night theme) | TODO |

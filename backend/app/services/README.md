@@ -1,4 +1,4 @@
-# services/
+# 🧩 services/
 
 The real work. Every query filters by `business_id`. Multi-step writes use one transaction
 (`get_connection()`); single statements use `get_cursor()`.

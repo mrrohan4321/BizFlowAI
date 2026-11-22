@@ -1,4 +1,4 @@
-# ai_ml/tests
+# 🧪 ai_ml/tests
 
 Owner: Rajdeep Panja. Run from the **repo root**:
 
@@ -21,7 +21,7 @@ No database, no API key and no internet are needed: Groq and OCR calls are mocke
 | `test_assistant.py` | tool selection, greetings / capability / out-of-scope answers, Groq failures, insufficient data |
 | `test_messy_invoice_dataset.py` | runs every case from `fixtures/messy_invoice_scenarios.json` through schema + validation |
 
-## fixtures/messy_invoice_scenarios.json
+## 🧬 fixtures/messy_invoice_scenarios.json
 
 10 **synthetic** invoice scenarios (valid invoice, missing number, bad GSTIN, wrong total, CGST/SGST mismatch, IGST mixed with CGST,
 due date before invoice date, negative subtotal, malformed amount, missing due date). Each case lists the schema error or the exact

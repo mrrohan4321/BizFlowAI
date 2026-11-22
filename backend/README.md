@@ -1,4 +1,6 @@
-# Backend (FastAPI)
+# ⚙️ Backend (FastAPI)
+
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
 
 **Owner: Rohan Adak (Member 2).** Covers `backend/`, `database/` and the Render deployment (`../render.yaml`). Consumed by the React app in `../frontend/` (see [../frontend/README.md](../frontend/README.md)); wraps the `ai_ml/` module by Rajdeep Panja.
 
@@ -8,7 +10,7 @@ payables, overdue, summary and forecast numbers all come from `ai_ml/`.
 
 Interactive docs when running: **http://localhost:8000/docs** (Swagger). Shared contract: [../API-notes.md](../API-notes.md).
 
-## 1. What was built
+## 🧱 1. What was built
 
 | Feature | Where |
 |---|---|
@@ -26,7 +28,7 @@ Interactive docs when running: **http://localhost:8000/docs** (Swagger). Shared 
 | Safe uploads (extension + magic bytes + size, server-generated names) | `app/services/uploads.py` |
 | Tests, smoke test, Render deployment | `tests/`, `scripts/smoke_test.py`, `../render.yaml` |
 
-## 2. Layout
+## 📁 2. Layout
 
 ```
 backend/
@@ -50,7 +52,7 @@ backend/
 Design choices: plain **psycopg2 + raw SQL** (no ORM); routes are thin; every query has `WHERE business_id = %s`;
 the app imports `ai_ml` lazily for the assistant so startup does not depend on the Groq SDK.
 
-## 3. Run locally
+## 🛠️ 3. Run locally
 
 ```bash
 cd backend
@@ -64,7 +66,7 @@ uvicorn app.main:app --reload                             # http://localhost:800
 Check: `GET /api/health` -> `{"status":"ok","database":true}`.
 Run all backend commands **from `backend/`** (imports are `app.*`).
 
-### Environment variables
+### 🔧 Environment variables
 
 | Variable | Needed for | Notes |
 |---|---|---|
@@ -82,7 +84,7 @@ Run all backend commands **from `backend/`** (imports are `app.*`).
 
 `SUPABASE_KEY` and `DEMO_BUSINESS_ID` in `.env.example` are not read by the backend code today.
 
-## 4. Authentication and business isolation
+## 🔐 4. Authentication and business isolation
 
 1. Frontend logs in with Supabase Auth and gets an `access_token`.
 2. Every request except `/api/health` sends `Authorization: Bearer <access_token>`.
@@ -102,11 +104,11 @@ Run all backend commands **from `backend/`** (imports are `app.*`).
 > There is **no signup/onboarding endpoint yet** (see Known limitations). For now insert the row by SQL
 > (`database/seed_demo.sql` does it for the demo user).
 
-## 5. Endpoints
+## 🔌 5. Endpoints
 
 All paths are prefixed with `/api`. Errors always look like `{"error": {"code", "message", "details?"}}`.
 
-### Invoices
+### 📌 Invoices
 
 | Method | Path | Notes |
 |---|---|---|
@@ -134,7 +136,7 @@ too late -> 410 `extraction_expired`.
 Confirm: validation *errors* block saving (422 `invalid_invoice`, details list); *warnings* still save, with
 `review_status = "needs_review"`. Duplicate (same business + type + number) -> 409 `duplicate_invoice`.
 
-### Payments
+### 💳 Payments
 
 | Method | Path | Notes |
 |---|---|---|
@@ -142,7 +144,7 @@ Confirm: validation *errors* block saving (422 `invalid_invoice`, details list);
 | GET | `/payments` | filters `invoice_id`, `date_from`, `date_to`, `limit`, `offset` -> `{items}` |
 | GET | `/payments/overdue` | alias of `/analytics/overdue` |
 
-### Expenses and opening cash
+### 🧾 Expenses and opening cash
 
 | Method | Path | Notes |
 |---|---|---|
@@ -152,7 +154,7 @@ Confirm: validation *errors* block saving (422 `invalid_invoice`, details list);
 | PUT | `/opening-cash` | `{amount, as_of_date, note?}`; `as_of_date` **must be a month-end**; one row per date (upsert); amount may be negative |
 | GET | `/opening-cash` | `{items}` newest first |
 
-### Analytics, forecast, assistant
+### 📈 Analytics, forecast, assistant
 
 | Method | Path | Returns |
 |---|---|---|
@@ -166,7 +168,7 @@ Confirm: validation *errors* block saving (422 `invalid_invoice`, details list);
 Note: the route default `window=3` differs from the `ai_ml` default (12). It was chosen so a business with only a few
 months of data still gets a forecast; the API reports a warning when fewer months than `window` exist.
 
-## 6. How money is calculated (important)
+## 💰 6. How money is calculated (important)
 
 - The backend loads the business's rows and calls `ai_ml.finance_metrics` / `ai_ml.forecasting` /
   `ai_ml.assistant_tools`. **Do not re-implement these formulas in routes or the frontend.**
@@ -176,7 +178,7 @@ months of data still gets a forecast; the API reports a warning when fewer month
 - Forecast starts the month **after** the opening-cash `as_of_date`; later payments are excluded from history.
 - `operating_surplus_estimate` = recorded sales - recorded expenses. It is **not** cash or profit; the UI must label it that way.
 
-## 7. Error codes the frontend should handle
+## 🚨 7. Error codes the frontend should handle
 
 | HTTP | code | Meaning / suggested UI |
 |---|---|---|
@@ -198,7 +200,7 @@ months of data still gets a forecast; the API reports a warning when fewer month
 | 503 | `ai_not_configured`, `ocr_unavailable` | AI/OCR temporarily unavailable |
 | 500 | `database_error`, `internal_error`, `auth_misconfigured` | generic error |
 
-## 8. Tests
+## 🧪 8. Tests
 
 ```bash
 cd backend
@@ -209,7 +211,7 @@ is needed. Without a Postgres URL the whole backend suite is **skipped** (not fa
 
 Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`. For the frontend: `cd ../frontend && npm run build`.
 
-## 9. Deployment (Render)
+## 🚀 9. Deployment (Render)
 
 **Live:** [https://bizflow-backend-2onh.onrender.com](https://bizflow-backend-2onh.onrender.com/docs) - Swagger at `/docs`, health at `/api/health`. Frontend uses this as `VITE_API_URL`.
 
@@ -221,7 +223,7 @@ Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`. 
 - Uploaded files go to `/tmp/uploads` and vanish on restart. That is acceptable because a file is only needed during review.
 - Verify: `python backend/scripts/smoke_test.py` (see [scripts/README.md](scripts/README.md)).
 
-## 10. Security checklist (already implemented)
+## ✅ 10. Security checklist (already implemented)
 
 - JWT verified on every route except `/api/health`; business resolved server-side; every SQL filtered by `business_id`.
 - Request models reject unknown fields (`extra="forbid"`), so `business_id` cannot be injected.
@@ -230,7 +232,7 @@ Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`. 
 - Row Level Security enabled on every table (`database/migrations/002_enable_rls.sql`) so the public Supabase anon key cannot read data directly.
 - Row locks on payments and invoice edits prevent overpayment races.
 
-## 11. Known limitations / ideas for later
+## ⚠️ 11. Known limitations / ideas for later
 
 - No signup / "create my business" endpoint: a new user needs a `business_members` row inserted by SQL.
 - No endpoints for `customers` / `suppliers` tables (they exist in the DB, invoices just store `party_name`) or the `forecasts` table.
@@ -240,7 +242,7 @@ Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`. 
 - Single currency per business (`businesses.currency`, default INR); no multi-currency.
 - Render free plan: cold start ~1 min, 512 MB RAM.
 
-## 12. Where to change things
+## 🧭 12. Where to change things
 
 | I want to... | Edit |
 |---|---|
