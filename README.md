@@ -22,13 +22,14 @@
 | 🔗 Resource | Link |
 |---|---|
 | 🌍 Live web app (frontend) | [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) |
+| 🔑 Demo login | `demo@bizflow.com` / `DemoPass@2026` (sample data only) |
 | ⚙️ Live API / Swagger | [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) |
 | ❤️ API health check | [/api/health](https://bizflow-backend-2onh.onrender.com/api/health) |
 | 🎬 Demo video | [Watch on YouTube](https://youtu.be/Tf-raKI9BRM) |
 | 🗂️ Repository | [github.com/mrrohan4321/BizFlowAI](https://github.com/mrrohan4321/BizFlowAI) |
 
 The backend runs on Render's free plan: it **sleeps when unused**, so the first request can take about a minute. If a page seems stuck, wait and retry.
-
+Note: backend is on Render free tier; first load may take ~1 minute
 ---
 
 ## 🌟 Key Features
