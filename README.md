@@ -298,11 +298,11 @@ Environment variables: [`.env.example`](.env.example) · [`backend/README.md`](b
 
 ## 👥 Team (Finnovate)
 
-| Member | Role | Name | Roll No. | Owns |
+| Member | Role | Name | Owns |
 |---|---|---|---|---|
-| 1 | Frontend | Ronit Jana | TODO | `frontend/` |
-| 2 | Backend, Database, Deployment | Rohan Adak | TODO | `backend/`, `database/`, `render.yaml` |
-| 3 | AI / ML | Rajdeep Panja | TODO | `ai_ml/` |
+| 1 | Frontend | Ronit Jana | `frontend/` |
+| 2 | Backend, Database, Deployment | Rohan Adak | `backend/`, `database/`, `render.yaml` |
+| 3 | AI / ML | Rajdeep Panja | `ai_ml/` |
 
 `sample_data/` and `API-notes.md` are shared.
 
@@ -314,7 +314,7 @@ Environment variables: [`.env.example`](.env.example) · [`backend/README.md`](b
 | Backend API + tests + Render deployment | ✅ Done |
 | Database schema, migrations, RLS, demo seed | ✅ Done |
 | Frontend (8 screens) | ✅ Implemented (end-to-end check with demo login: see checklist) |
-| Live frontend URL | 🔲 TODO |
+| Live frontend URL | ✅ DONE |
 | Demo video | 🔲 TODO |
 | Report | 🔲 TODO |
 | Presentation | 🔲 TODO |
