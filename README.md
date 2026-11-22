@@ -2,7 +2,7 @@
 
 [![Live API](https://img.shields.io/badge/Live%20API-Render-46E3B7?logo=render&logoColor=white)](https://bizflow-backend-2onh.onrender.com/docs)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-mrrohan4321%2FBizFlowAI-blue?logo=github)](https://github.com/mrrohan4321/BizFlowAI)
-[![Live App](https://img.shields.io/badge/Live%20App-TODO-lightgrey)]((https://biz-flow-ai-xi.vercel.app/))
+[![Live App](https://img.shields.io/badge/Live%20App-Vercel-black?logo=vercel&logoColor=white)](https://biz-flow-ai-xi.vercel.app/)
 [![Demo Video](https://img.shields.io/badge/Demo-TODO-lightgrey?logo=youtube)](#-live-application)
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)
@@ -21,7 +21,7 @@
 
 | 🔗 Resource | Link |
 |---|---|
-| 🌍 Live web app (frontend) | TODO: add deployed frontend URL |
+| 🌍 Live web app (frontend) | [biz-flow-ai-xi.vercel.app](https://biz-flow-ai-xi.vercel.app/) |
 | ⚙️ Live API / Swagger | [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) |
 | ❤️ API health check | [/api/health](https://bizflow-backend-2onh.onrender.com/api/health) |
 | 🎬 Demo video | TODO: add YouTube link |
@@ -273,10 +273,10 @@ The frontend has no automated tests yet; `npm run build` plus the demo script is
 | Part | Where | Notes |
 |---|---|---|
 | Backend | Render via [`render.yaml`](render.yaml) | start command runs migrations, then Uvicorn; health check `/api/health` |
-| Frontend | static host (Vercel config included) | set the 3 `VITE_` variables, keep the "all paths → `/index.html`" rewrite |
+| Frontend | Vercel ([live](https://biz-flow-ai-xi.vercel.app/)) | set the 3 `VITE_` variables, keep the "all paths → `/index.html`" rewrite (`frontend/vercel.json`) |
 | Database / Auth | Supabase | use the connection **pooler** string for `DATABASE_URL` on Render |
 
-After deploying the frontend, add its HTTPS URL to `ALLOWED_ORIGINS` on Render, otherwise the browser blocks every call (CORS). Check a deployment with `python backend/scripts/smoke_test.py`.
+The frontend's HTTPS URL (`https://biz-flow-ai-xi.vercel.app`, no trailing slash) must be in `ALLOWED_ORIGINS` on Render (comma-separated, for example `http://localhost:5173,https://biz-flow-ai-xi.vercel.app`), otherwise the browser blocks every call (CORS). Check a deployment with `python backend/scripts/smoke_test.py`.
 
 Environment variables: [`.env.example`](.env.example) · [`backend/README.md`](backend/README.md#-environment-variables) · [`frontend/README.md`](frontend/README.md). **Never commit `.env`**, the database password, the JWT secret or the Groq key.
 
@@ -299,7 +299,7 @@ Environment variables: [`.env.example`](.env.example) · [`backend/README.md`](b
 ## 👥 Team (Finnovate)
 
 | Member | Role | Name | Owns |
-|---|---|---|---|---|
+|---|---|---|---|
 | 1 | Frontend | Ronit Jana | `frontend/` |
 | 2 | Backend, Database, Deployment | Rohan Adak | `backend/`, `database/`, `render.yaml` |
 | 3 | AI / ML | Rajdeep Panja | `ai_ml/` |
@@ -314,7 +314,7 @@ Environment variables: [`.env.example`](.env.example) · [`backend/README.md`](b
 | Backend API + tests + Render deployment | ✅ Done |
 | Database schema, migrations, RLS, demo seed | ✅ Done |
 | Frontend (8 screens) | ✅ Implemented (end-to-end check with demo login: see checklist) |
-| Live frontend URL | ✅ DONE |
+| Live frontend URL | ✅ Done ([Vercel](https://biz-flow-ai-xi.vercel.app/)) |
 | Demo video | 🔲 TODO |
 | Report | 🔲 TODO |
 | Presentation | 🔲 TODO |
