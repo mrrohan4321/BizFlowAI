@@ -1,4 +1,4 @@
-# components/
+# 🧱 components/
 
 `UI.jsx` holds the small shared building blocks used by every page.
 

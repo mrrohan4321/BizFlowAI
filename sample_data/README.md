@@ -1,10 +1,12 @@
-# Sample data (synthetic only - never commit real invoices)
+# 🗂️ Sample data (synthetic only - never commit real invoices)
+
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
 
 Shared by the whole team (used by the demo, the smoke test and the frontend checks).
 
 Everything here is fictional. Real customer invoices must never be committed (`sample_data/real/` is git-ignored).
 
-## `invoices/` - files for the upload demo (`POST /api/invoices/extract`)
+## 📁 `invoices/` - files for the upload demo (`POST /api/invoices/extract`)
 
 | File | What it demonstrates |
 |---|---|
@@ -20,12 +22,12 @@ Note: the demo seed already contains INV-102, INV-103 and PUR-201. Saving the sa
 `409 duplicate_invoice`. To demo a fresh save, either use `INV-104`, change the invoice number in the review form,
 or delete that invoice first (only possible while it has no payments).
 
-## `synthetic/`
+## 🧬 `synthetic/`
 
 Reserved for generated test datasets (currently only `.gitkeep`). The 10 messy-invoice *test scenarios* used by the AI/ML tests live in
 `ai_ml/tests/fixtures/messy_invoice_scenarios.json`.
 
-## Database demo data
+## 🎬 Database demo data
 
 `database/seed_demo.sql` - see [../database/README.md](../database/README.md).
 Used by `backend/scripts/smoke_test.py`, which uploads `sales_INV-102_clean.png` for the extraction check.

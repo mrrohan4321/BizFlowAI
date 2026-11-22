@@ -1,8 +1,8 @@
-# Backend scripts
+# 🩺 Backend scripts
 
 Owner: Rohan Adak.
 
-## smoke_test.py - check a *running* server end to end
+## 🧪 smoke_test.py - check a *running* server end to end
 
 Not a pytest test. Use it after deploying (or to check local setup). It is **read-only**: it never saves or changes records,
 and never prints the access token.

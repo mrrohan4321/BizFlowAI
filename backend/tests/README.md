@@ -1,4 +1,4 @@
-# Backend tests
+# 🧪 Backend tests
 
 Owner: Rohan Adak. The AI/ML tests are separate: [../../ai_ml/tests/README.md](../../ai_ml/tests/README.md).
 
@@ -13,7 +13,7 @@ TEST_DATABASE_URL=postgresql://user:pass@host:5432/db python -m pytest tests -v
   Tables are truncated before every test.
 - Groq is mocked, no API key needed. JWTs are signed with a test secret (`make_token` in `conftest.py`).
 
-## Files
+## 📁 Files
 
 | File | Covers |
 |---|---|
@@ -27,7 +27,7 @@ TEST_DATABASE_URL=postgresql://user:pass@host:5432/db python -m pytest tests -v
 | `test_assistant.py` | chat with mocked Groq, missing opening cash, unsupported question, greetings and "what can you do?" (friendly answer, no tool), Groq outage / missing key / bad AI response, other business data never sent to Groq |
 | `test_security_and_migrations.py` | every table has RLS, migrations are safe to re-run |
 
-## Writing a new test
+## ➕ Writing a new test
 
 Use the `world` fixture (`world.biz_a`, `world.h_a` = auth headers for business A, `world.biz_b`, `world.h_b`),
 helpers `add_payment`, `add_expense`, `set_opening`, `known_answer`. Always add a cross-business case: user B must get 404/empty for A's data.

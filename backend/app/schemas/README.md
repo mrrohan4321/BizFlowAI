@@ -1,4 +1,4 @@
-# schemas/
+# 📝 schemas/
 
 Pydantic request models. Almost all use `extra="forbid"`: any unknown field, including a client-sent
 `business_id`, is rejected with `422 invalid_request`. Strings are stripped.

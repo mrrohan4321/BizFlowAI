@@ -1,4 +1,6 @@
-# BizFlowAI — AI/ML Module
+# 🧠 BizFlowAI — AI/ML Module
+
+🌐 **Live API:** [bizflow-backend-2onh.onrender.com/docs](https://bizflow-backend-2onh.onrender.com/docs) · 🌍 **Live app:** TODO · 🎬 **Demo video:** TODO
 
 **Owner: Rajdeep Panja (Member 3).** Integrated into the FastAPI backend by Rohan Adak (see the table at the end of section 10) and shown in the React app by Ronit Jana.
 
@@ -10,7 +12,7 @@ The module combines OCR, structured AI-based extraction, deterministic Python ca
 
 ---
 
-## 1. Overview
+## 📖 1. Overview
 
 The AI/ML module provides:
 
@@ -30,7 +32,7 @@ The module is independent of the database and frontend.
 
 The backend retrieves authorized business data and supplies it to the AI/ML functions.
 
-## 2. Architecture
+## 🏗️ 2. Architecture
 
 ```text
 Frontend
@@ -73,7 +75,7 @@ Pydantic Validation        |
             Frontend
 ```
 
-### Design principles
+### 🎨 Design principles
 
 - Deterministic financial calculations.
 - Structured invoice extraction.
@@ -84,7 +86,7 @@ Pydantic Validation        |
 - Restricted assistant tool execution.
 - No LLM-generated SQL or financial arithmetic.
 
-## 3. Project structure
+## 📁 3. Project structure
 
 ```text
 ai_ml/
@@ -116,7 +118,7 @@ ai_ml/
     └── test_messy_invoice_dataset.py
 ```
 
-### Module responsibilities
+### 📌 Module responsibilities
 
 | File | Responsibility |
 |---|---|
@@ -132,7 +134,7 @@ ai_ml/
 | `tests/fixtures/messy_invoice_scenarios.json` | Synthetic invoice test scenarios |
 | `tests/test_messy_invoice_dataset.py` | Tests for the synthetic invoice dataset |
 
-## 4. Technology stack
+## 🧰 4. Technology stack
 
 The AI/ML module uses:
 
@@ -152,11 +154,11 @@ Configured Groq model:
 
 The model can be changed through environment configuration.
 
-## 5. Installation and configuration
+## ⚙️ 5. Installation and configuration
 
 Run commands from the project root.
 
-### Install dependencies
+### 📌 Install dependencies
 
 Install the project's backend dependencies:
 
@@ -176,7 +178,7 @@ Other shared dependencies are already included in the backend requirements.
 
 Use the project's tested Python environment and dependency versions.
 
-### Environment variables
+### 🔧 Environment variables
 
 Create a `.env` file in the project root.
 
@@ -201,7 +203,7 @@ Existing environment variables take priority.
 
 The Groq API key is required when a Groq-powered operation executes, not merely when importing the package.
 
-### Configuration reference
+### ⚙️ Configuration reference
 
 | Variable | Purpose |
 |---|---|
@@ -211,9 +213,9 @@ The Groq API key is required when a Groq-powered operation executes, not merely 
 | `MIN_TEXT_CHARS_PER_PAGE` | Threshold for sparse PDF text |
 | `AMOUNT_TOLERANCE` | Tolerance for invoice amount validation |
 
-## 6. Invoice OCR and extraction
+## 🔎 6. Invoice OCR and extraction
 
-### OCR
+### 🔎 OCR
 
 File: `ocr.py`
 
@@ -238,7 +240,7 @@ Temporary OCR files are cleaned up after use.
 
 Unsupported files and password-protected PDFs produce explicit errors.
 
-### Invoice extraction
+### 📌 Invoice extraction
 
 File: `invoice_extraction.py`
 
@@ -263,7 +265,7 @@ Pipeline:
 5. Run deterministic invoice validation.
 6. Return the result for human review.
 
-### Extracted fields
+### 📌 Extracted fields
 
 The `InvoiceFields` schema supports:
 
@@ -290,7 +292,7 @@ Rules:
 - Both Indian and international comma grouping are supported.
 - Invalid monetary values are rejected.
 
-### Extraction result
+### 📌 Extraction result
 
 `extract_invoice()` returns an `InvoiceExtractionResult` containing:
 
@@ -306,7 +308,7 @@ Rules:
 
 `needs_review` remains `True`. The backend must provide a human-review workflow and must not automatically save an extracted invoice as an approved record.
 
-### Error handling
+### 🚨 Error handling
 
 OCR and file-processing errors propagate to the caller.
 
@@ -320,7 +322,7 @@ AI extraction failures return an `InvoiceExtractionResult` with:
 
 The backend should handle OCR exceptions and present appropriate feedback to the user.
 
-## 7. Invoice validation
+## ✅ 7. Invoice validation
 
 File: `validation.py`
 
@@ -354,7 +356,7 @@ Severity values:
 
 Validation is not a government GST database lookup and does not establish legal tax compliance.
 
-## 8. Financial metrics
+## 📊 8. Financial metrics
 
 File: `finance_metrics.py`
 
@@ -372,7 +374,7 @@ from ai_ml.finance_metrics import (
 )
 ```
 
-### Business summary
+### 📌 Business summary
 
 ```python
 summary = calculate_business_summary(
@@ -393,7 +395,7 @@ The summary calculates:
 
 Records are filtered using the supplied business ID.
 
-### Overdue invoices
+### 📌 Overdue invoices
 
 ```python
 overdue = get_overdue_invoices(
@@ -410,7 +412,7 @@ Returned records include invoice identifiers, party information, outstanding amo
 
 The backend must provide authorized business-scoped records.
 
-## 9. Cash-flow forecasting
+## 📈 9. Cash-flow forecasting
 
 File: `forecasting.py`
 
@@ -450,7 +452,7 @@ The forecast estimates future:
 
 The result includes forecast periods, assumptions, the method used, and closing cash.
 
-### Important limitations
+### ⚠️ Important limitations
 
 - A moving average is a baseline, not a guarantee.
 - Forecast quality depends on the quality and length of historical data.
@@ -460,7 +462,7 @@ The result includes forecast periods, assumptions, the method used, and closing 
 - The backend must supply the available historical financial data.
 - Forecasts must be presented as estimates, not guaranteed outcomes.
 
-## 10. Financial assistant
+## 💬 10. Financial assistant
 
 File: `assistant.py`
 
@@ -477,7 +479,7 @@ response = answer_finance_question(
 )
 ```
 
-### Approved tools
+### 📌 Approved tools
 
 The assistant can select from five approved Python tools:
 
@@ -495,7 +497,7 @@ Python performs the financial calculations.
 
 The LLM does not execute SQL or independently calculate financial totals.
 
-### Greetings, capability questions and out-of-scope questions
+### 📌 Greetings, capability questions and out-of-scope questions
 
 When the question does not need a financial tool, the assistant does **not** call Groq. `_fallback_answer()` returns a fixed, friendly answer:
 
@@ -508,7 +510,7 @@ When the question does not need a financial tool, the assistant does **not** cal
 All three return `tool_used=None`, `data=None` and `insufficient_data=False`. `insufficient_data=True` is reserved for missing data
 (for example no history for the forecast) or an unavailable AI service.
 
-### Backend arguments
+### 📌 Backend arguments
 
 `answer_finance_question()` accepts:
 
@@ -527,7 +529,7 @@ All three return `tool_used=None`, `data=None` and `insufficient_data=False`. `i
 
 The current assistant does not independently expose an expense-specific tool. The `expenses` parameter is accepted but is not currently passed into the five registered assistant tools.
 
-### Backend integration example
+### 🔗 Backend integration example
 
 ```python
 from ai_ml.assistant import answer_finance_question
@@ -544,7 +546,7 @@ return response.model_dump(mode="json")
 
 This is an example of the integration pattern. The backend must implement authentication, authorization, database retrieval, and business-level filtering.
 
-### Assistant response
+### 💬 Assistant response
 
 The function returns an `AssistantResponse` containing:
 
@@ -558,7 +560,7 @@ The `data` field contains the actual result from the approved Python tool.
 
 If Groq fails during answer generation, the calculated financial result is preserved and a fallback explanation is returned.
 
-### How the backend uses this module (status: integrated)
+### ✅ How the backend uses this module (status: integrated)
 
 | ai_ml function | Called from `backend/app/services/` | Used for |
 |---|---|---|
@@ -575,7 +577,7 @@ The backend sends only the authenticated business's records, passes the real ope
 and builds monthly history from actual payments and expenses marked paid. Do not change these function signatures without updating
 `backend/app/services/` and its tests. See [../backend/README.md](../backend/README.md).
 
-## 11. Backend integration responsibilities
+## 🔗 11. Backend integration responsibilities
 
 The AI/ML module does not:
 
@@ -590,7 +592,7 @@ The AI/ML module does not:
 
 These responsibilities belong to the backend and frontend.
 
-### Mandatory backend responsibilities
+### 📌 Mandatory backend responsibilities
 
 1. Authenticate the current user.
 2. Identify the user's authorized business.
@@ -604,7 +606,7 @@ These responsibilities belong to the backend and frontend.
 
 **Business isolation must be enforced by the backend, not by the LLM.**
 
-## 12. Security considerations
+## 🔒 12. Security considerations
 
 - Keep Groq API credentials in environment variables.
 - Never expose secrets in frontend code.
@@ -616,7 +618,7 @@ These responsibilities belong to the backend and frontend.
 - Enforce business authorization before passing records into AI/ML functions.
 - Require human review before invoice persistence.
 
-## 13. Testing
+## 🧪 13. Testing
 
 Run tests from the project root:
 
@@ -656,7 +658,7 @@ Check whitespace errors:
 git diff --check
 ```
 
-### Synthetic invoice dataset
+### 🧬 Synthetic invoice dataset
 
 The test fixture `tests/fixtures/messy_invoice_scenarios.json` contains 10 synthetic invoice scenarios designed to exercise invoice schema parsing and deterministic validation.
 
@@ -679,7 +681,7 @@ These are synthetic test cases, not real customer invoices. They help verify how
 
 The AI/ML module has been tested with unit tests and live Groq/OCR integration checks.
 
-## 14. Known limitations
+## ⚠️ 14. Known limitations
 
 - Invoice extraction depends on OCR quality and Groq availability.
 - Extracted values require human review.
@@ -690,7 +692,7 @@ The AI/ML module has been tested with unit tests and live Groq/OCR integration c
 - Currency display must be based on explicitly supplied currency information.
 - The current assistant supports five registered financial tools.
 
-## 15. Quick reference
+## ⚡ 15. Quick reference
 
 | Task | Function |
 |---|---|
