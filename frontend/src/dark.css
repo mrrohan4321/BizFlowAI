@@ -1,0 +1,82 @@
+/* Theme toggle button (both themes) */
+.theme-toggle{width:35px;height:35px;display:grid;place-items:center;border:1px solid #e0e7ed;background:#fff;color:#536878;border-radius:50%;padding:0;transition:.15s}
+.theme-toggle:hover{background:#f0f5f5}
+
+/* ---------- Night theme ---------- */
+html[data-theme="dark"]{color-scheme:dark}
+html[data-theme="dark"],[data-theme="dark"] body{background:#0d1417;color:#e3ecf0}
+[data-theme="dark"] p{color:#8d9eab}
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:#16232a;border-color:#27383f;color:#e3ecf0}
+[data-theme="dark"] input::placeholder{color:#6b7d8a}
+[data-theme="dark"] input:focus,[data-theme="dark"] select:focus,[data-theme="dark"] textarea:focus{outline-color:#1d6b58}
+
+/* surfaces */
+[data-theme="dark"] .sidebar,[data-theme="dark"] .topbar,[data-theme="dark"] .panel,
+[data-theme="dark"] .date-strip,[data-theme="dark"] .stat-card,[data-theme="dark"] .quick-card,
+[data-theme="dark"] .invoice-summary>div,[data-theme="dark"] .upload-tips>div,
+[data-theme="dark"] .chat-shell,[data-theme="dark"] .pagination button,
+[data-theme="dark"] .btn-outline,[data-theme="dark"] .suggestions button,
+[data-theme="dark"] .followups button,[data-theme="dark"] .theme-toggle{background:#121c20;border-color:#22323a}
+[data-theme="dark"] .modal{background:#121c20;box-shadow:0 20px 80px #000a}
+[data-theme="dark"] .modal-backdrop{background:#000a}
+[data-theme="dark"] .panel{box-shadow:none}
+[data-theme="dark"] .footer,[data-theme="dark"] .chat-head,[data-theme="dark"] .chat-composer,
+[data-theme="dark"] .review-footer,[data-theme="dark"] .opening-history,[data-theme="dark"] .quick-card>a{border-color:#22323a}
+[data-theme="dark"] .workspace-card,[data-theme="dark"] .raw-preview,[data-theme="dark"] .chat-composer form,
+[data-theme="dark"] .search-input{border-color:#27383f}
+[data-theme="dark"] .side-help{background:#142320;border-color:#1f3a33}
+[data-theme="dark"] .side-help strong{color:#bfe3d6}
+[data-theme="dark"] .side-help small{color:#7fa597}
+
+/* text */
+[data-theme="dark"] .top-breadcrumb strong,[data-theme="dark"] td strong,[data-theme="dark"] .money-cell,
+[data-theme="dark"] .state strong,[data-theme="dark"] .opening-history>div>strong,
+[data-theme="dark"] .dropzone strong,[data-theme="dark"] .field{color:#dbe6ec}
+[data-theme="dark"] .btn-outline,[data-theme="dark"] .theme-toggle,[data-theme="dark"] .pagination button{color:#a9bac6}
+[data-theme="dark"] .nav-item{color:#92a3b0}
+[data-theme="dark"] .nav-item:hover{background:#16282a;color:#4fd3a8}
+[data-theme="dark"] .nav-item.active{background:#143a31;color:#4fd3a8}
+[data-theme="dark"] td{border-color:#1c2a31;color:#93a4b1}
+[data-theme="dark"] th{background:#16232a;color:#8a9ba8}
+[data-theme="dark"] .panel-tag{background:#16232a;border-color:#27383f;color:#93a4b1}
+[data-theme="dark"] .bubble{background:#18262c;color:#c8d6de}
+[data-theme="dark"] .user .bubble{background:#178a6c;color:#fff}
+[data-theme="dark"] .message.user .message-avatar{background:#22323a;color:#9fb1bd}
+[data-theme="dark"] .logout{color:#93a4b1}
+
+/* soft green / tinted chips */
+[data-theme="dark"] .workspace-avatar,[data-theme="dark"] .quick-icon,[data-theme="dark"] .table-action,
+[data-theme="dark"] .chat-avatar,[data-theme="dark"] .chat-welcome-icon,[data-theme="dark"] .message-avatar,
+[data-theme="dark"] .upload-icon,[data-theme="dark"] .welcome-icon{background:#143a31;color:#4fd3a8}
+[data-theme="dark"] .user-avatar{background:#143a31;color:#4fd3a8;border-color:#1f5a49}
+[data-theme="dark"] .live-pill,[data-theme="dark"] .chat-head-tag{background:#12332b;border-color:#1c4a3d;color:#5fd9b0}
+[data-theme="dark"] .icon-btn:hover,[data-theme="dark"] .theme-toggle:hover{background:#1a2a31}
+[data-theme="dark"] .disclaimer{background:#132421;color:#8fc4b4}
+[data-theme="dark"] .empty-icon{background:#16232a}
+
+/* status badges */
+[data-theme="dark"] .status{background:#3a2d17;color:#f0b866}
+[data-theme="dark"] .status-paid{background:#12332b;color:#5fd9b0}
+[data-theme="dark"] .status-partially_paid{background:#14283d;color:#7db8ee}
+[data-theme="dark"] .status-needs_review{background:#3a2d17;color:#f0b866}
+[data-theme="dark"] .warning-item,[data-theme="dark"] .notice{background:#2f2614;border-color:#4a3a1c;color:#e3b872}
+[data-theme="dark"] .warning-item.severe,[data-theme="dark"] .error-box{background:#35191a;border-color:#5a2a2b;color:#f0a3a0}
+[data-theme="dark"] .btn-danger{background:#35191a;color:#f0a3a0;border-color:#5a2a2b}
+
+/* upload + stepper */
+[data-theme="dark"] .dropzone{background:#111d1c;border-color:#1f5a49}
+[data-theme="dark"] .dropzone.dragging{background:#143a31;border-color:#2ab58c}
+[data-theme="dark"] .step>span{background:#22323a;color:#93a4b1}
+[data-theme="dark"] .step.current>span,[data-theme="dark"] .step.complete>span{background:#168b6e;color:#fff}
+[data-theme="dark"] .step-line{background:#27383f}
+
+/* cards that are already dark-green keep their look; login page */
+[data-theme="dark"] .login-layout{background:#0d1417}
+[data-theme="dark"] .login-form-side{background:#0d1417}
+
+/* recharts (SVG attrs are overridden by CSS) */
+[data-theme="dark"] .recharts-cartesian-grid line{stroke:#22323a}
+[data-theme="dark"] .recharts-text,[data-theme="dark"] .recharts-cartesian-axis-tick-value{fill:#8a9ba8}
+[data-theme="dark"] .recharts-default-tooltip{background:#16232a!important;border-color:#27383f!important}
+[data-theme="dark"] .recharts-tooltip-label,[data-theme="dark"] .recharts-tooltip-item{color:#dbe6ec!important}
+[data-theme="dark"] .recharts-bar-rectangle path[fill="#cbd5e1"]{fill:#4a5b68}
