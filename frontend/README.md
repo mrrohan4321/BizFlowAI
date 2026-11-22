@@ -1,185 +1,140 @@
 # Frontend (React + Vite + Tailwind)
 
-**Status: IMPLEMENTED (local build verified; authenticated live flows require demo credentials).**
-The React frontend includes login, overview, upload/review/confirm, invoices/payments, expenses, opening cash/forecast, and the assistant.
+**Owner: Ronit Jana (Member 1).** A single-page app for the BizFlow AI backend: login, overview dashboard,
+invoice upload with human review, invoices and payments, expenses, opening cash and forecast, and the finance assistant.
 
-## Start here — first-time frontend setup
+> **Status: implemented.** `npm run build` passes (checked on 20 Nov 2026). The authenticated end-to-end flow with the real demo login
+> still has to be ticked off against the deployed backend: see [section 8](#8-verification-checklist). Do not describe the demo numbers as
+> verified until you have run that checklist.
 
-1. Install **Node.js 20.19+ or 22.12+** (Node 24 also works).
-2. Open a terminal inside `frontend/` and run `npm install`.
-3. Copy `.env.example` to `.env` and fill in the following values (ask your backend teammate for the Supabase project URL and **public anon/publishable key**):
+The frontend only **shows data and collects input**. It never calculates receivables, payables, overdue days, balances or forecasts
+(that is `ai_ml/`, reached through the backend), never talks to Groq, and never sends a `business_id`.
 
-   ```env
-   VITE_API_URL=https://bizflow-backend-2onh.onrender.com
-   VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-   VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
-   ```
+## 1. Run it
 
-4. Run `npm run dev` and open `http://localhost:5173`.
-5. Log in with the Supabase demo user already linked to Sen Electricals in `business_members`.
-
-**Do not** put the database password, JWT secret, or Groq key in `.env`. The backend owner must allow `http://localhost:5173` in `ALLOWED_ORIGINS` on Render.
-
-For production: `npm run build` generates `dist/`; deploy the folder on Vercel, Netlify or other static hosting. Configure the same three `VITE_` variables on the host, enable an SPA rewrite to `/index.html`, and have the backend owner allow your deployed HTTPS origin in `ALLOWED_ORIGINS`.
-
-### What is included
-
-| Page | API calls |
-|---|---|
-| Login | Supabase `signInWithPassword`, `getSession`, `signOut` |
-| Dashboard | `GET /api/analytics/summary`, `/monthly`, `/overdue` |
-| Upload & review | `POST /api/invoices/extract`, then `POST /api/invoices` only on user confirmation |
-| Invoices | `GET /api/invoices` with filters/pagination |
-| Invoice details | `GET/PATCH/DELETE /api/invoices/{id}`, `GET/POST /api/payments` |
-| Expenses | `GET/POST /api/expenses`, `PATCH /api/expenses/{id}` |
-| Cash flow | `GET/PUT /api/opening-cash`, `GET /api/forecast` |
-| Assistant | `POST /api/assistant/chat` |
-
-### Verification and limitations (20 November 2026)
-
-- Vite production compilation **passed**. The JS bundle currently reports a size warning; code-splitting is a future optimization.
-- Public deployed `/api/health` returned `{"status":"ok","database":true}`.
-- Authenticated demo flows could **not** be verified because no Supabase URL, public anon key, or demo login credentials were supplied. The UI must be tested after configuring them; do not treat the expected ₹45,000/₹20,000 or payment demo values as verified.
-- Dependency installation from the npm registry was blocked in the execution environment. The production compilation was run with compatible locally available node_modules. On your machine, use `npm install` with internet access.
-- The backend does not provide signup/business onboarding, invoice file download, or expense deletion. Ask the backend owner about these after the hackathon if needed.
-- Expense list uses up to 100 records; backend does not return a total for expense pagination.
-
-The remaining historical sections below are the original implementation brief; the instructions above describe the actual completed frontend.
-
-> Using Claude / an AI coding assistant? Give it [FRONTEND_CLAUDE_HANDOFF.md](FRONTEND_CLAUDE_HANDOFF.md) as the first prompt
-> (same idea as `ai_ml/BACKEND_CLAUDE_HANDOFF.md` that was used for the backend).
-
-## 1. Read these first (10 minutes)
-
-| File | Why |
-|---|---|
-| [../README.md](../README.md) | product flow, key money rules, setup |
-| [../backend/README.md](../backend/README.md) | **the full API reference**: every endpoint, request/response, error codes |
-| [../API-notes.md](../API-notes.md) | the shared contract (agree before changing) |
-| **https://bizflow-backend-2onh.onrender.com/docs** | live Swagger of the DEPLOYED backend - try calls, see real JSON (no local backend needed). Local: `http://localhost:8000/docs` |
-| [../sample_data/README.md](../sample_data/README.md) | invoices to use in the upload demo |
-
-## 2. Create the app
+Requirements: **Node.js 20.19+ or 22.12+** (Node 24 also works).
 
 ```bash
 cd frontend
-npm create vite@latest . -- --template react
 npm install
-npm install tailwindcss @tailwindcss/vite recharts axios react-router-dom @supabase/supabase-js
+cp .env.example .env        # then fill the three values below
+npm run dev                 # http://localhost:5173
 ```
-(Tailwind: follow the current Vite guide; v4 uses the `@tailwindcss/vite` plugin.) Keep the existing `src/components`, `src/pages`,
-`src/services` folders.
 
-### Environment (`frontend/.env`, never commit)
+`frontend/.env` (public values only; ask Rohan for the Supabase project URL and the public anon/publishable key):
 
 ```env
-VITE_API_URL=https://bizflow-backend-2onh.onrender.com   # deployed backend (use this if you do not run the backend locally)
-# VITE_API_URL=http://localhost:8000     # local backend
-VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=<anon/publishable key>   # public key only. NEVER put GROQ_API_KEY, DATABASE_URL or the JWT secret here
+VITE_API_URL=https://bizflow-backend-2onh.onrender.com     # deployed backend, or http://localhost:8000
+VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
 ```
-Add `frontend/.env.example` with the names only. The backend `ALLOWED_ORIGINS` must contain your dev/prod frontend URL
-(`http://localhost:5173` is the default) or every call fails with a CORS error.
 
-## 2b. Deployed backend (use this, no setup needed)
+**Never** put the database password, the JWT secret or the Groq key here. Anything starting with `VITE_` is visible in the browser.
+If a variable is missing the app shows a clear "Supabase is not configured" message instead of crashing.
 
-| What | URL |
+The backend must allow your origin: `http://localhost:5173` is allowed by default; for a deployed frontend the backend owner must add its
+HTTPS URL to `ALLOWED_ORIGINS` on Render, otherwise every request fails with a CORS error.
+Log in with the Supabase demo user linked to "Sen Electricals" (see [../database/README.md](../database/README.md)).
+Render's free plan sleeps: the first request can take up to a minute (the UI says "the server may be waking up").
+
+## 2. Scripts
+
+| Command | What it does |
 |---|---|
-| API base (`VITE_API_URL`) | `https://bizflow-backend-2onh.onrender.com` |
-| Swagger UI | `https://bizflow-backend-2onh.onrender.com/docs` |
-| Health check | `https://bizflow-backend-2onh.onrender.com/api/health` |
+| `npm run dev` | dev server on port 5173 (`--host 0.0.0.0`) |
+| `npm run build` | production build into `dist/` |
+| `npm run preview` | serve the built `dist/` locally |
 
-Swagger: click **Authorize**, paste a Supabase `access_token` (see root README, "Getting a token for Swagger"), then try endpoints.
-Render free plan: the first request after idle can take ~1 minute (server waking up). The deployed `ALLOWED_ORIGINS` must include your
-frontend URL - ask the backend owner to add `http://localhost:5173` (and the deployed frontend URL) in the Render dashboard if you see a CORS error.
-The deployed database is the same Supabase DB as the demo seed, so use the seeded demo user.
+`package.json` also lists `npm run lint`, but ESLint is not installed or configured, so it will not work yet.
+There are no automated frontend tests yet.
 
-## 3. How the frontend talks to the system
+## 3. Screens and the API calls they make
+
+| Route | Page file | Calls |
+|---|---|---|
+| `/login` | `pages/Login.jsx` | Supabase `signInWithPassword` |
+| `/` Overview | `pages/Dashboard.jsx` | `GET /api/analytics/summary`, `/analytics/overdue`, `/analytics/monthly` (bar charts, date filter) |
+| `/upload` | `pages/UploadInvoice.jsx` | `POST /api/invoices/extract`, then `POST /api/invoices` **only after the user confirms** |
+| `/invoices` | `pages/Invoices.jsx` | `GET /api/invoices` (filters, pagination) |
+| `/invoices/:id` | `pages/InvoiceDetail.jsx` | `GET/PATCH/DELETE /api/invoices/{id}`, `GET/POST /api/payments` |
+| `/expenses` | `pages/Expenses.jsx` | `GET/POST /api/expenses`, `PATCH /api/expenses/{id}` (mark paid) |
+| `/cash-flow` | `pages/CashFlow.jsx` | `GET/PUT /api/opening-cash`, `GET /api/forecast` (area chart) |
+| `/assistant` | `pages/Assistant.jsx` | `POST /api/assistant/chat` |
+
+All routes except `/login` are behind an auth guard (`App.jsx`). Unknown paths redirect to `/`.
+The full API reference (bodies, responses, error codes) is in [../backend/README.md](../backend/README.md); the short contract is [../API-notes.md](../API-notes.md).
+
+## 4. Folder structure
+
+```
+frontend/
+├── index.html, vite.config.js      Vite + React + Tailwind v4 plugin, dev port 5173
+├── vercel.json                     rewrites every path to /index.html (needed for React Router)
+├── .env.example                    names of the 3 VITE_ variables
+├── FRONTEND_CLAUDE_HANDOFF.md      the brief used to build this app
+├── public/favicon.svg
+└── src/
+    ├── main.jsx, App.jsx           router, auth guard, app shell (sidebar, top bar, mobile menu)
+    ├── theme.js                    light / night theme (saved in localStorage as "bizflow-theme")
+    ├── style.css, dark.css         styles; dark.css holds the night-theme overrides
+    ├── services/                   API + auth code only (no UI)        -> services/README.md
+    ├── components/UI.jsx           shared UI pieces                    -> components/README.md
+    └── pages/                      one file per screen                 -> pages/README.md
+```
+
+## 5. How it talks to the backend
 
 ```
 Browser --Supabase JS--> Supabase Auth (login)  -> access_token
 Browser --axios + Bearer access_token--> FastAPI backend --> Postgres / ai_ml / Groq
 ```
 
-- **Supabase is used ONLY for login/logout/session.** All business data comes from the FastAPI backend. Never read
-  tables with the Supabase client (RLS blocks it anyway).
-- Every API call: `Authorization: Bearer <session.access_token>`. Get the token from `supabase.auth.getSession()` on each request
-  (it auto-refreshes).
-- **Never send `business_id`** (the backend rejects it with 422). Only if the user has several businesses, send header `X-Business-Id`.
-- Errors always arrive as `{"error": {"code","message","details"}}`. Build one axios interceptor that turns this into a
-  friendly message (code table in backend/README.md section 7). On 401 -> sign out and go to login.
-- Money fields are JSON numbers. Display with `Intl.NumberFormat('en-IN', {style:'currency', currency:'INR'})`
-  (the summary response has `currency`). **Do not calculate receivables/payables/overdue/forecast in the browser** - show what the API returns.
+- `services/supabase.js` creates the Supabase client (used **only** for login, logout and the session). Business data is never read with the Supabase client (RLS blocks it anyway).
+- `services/api.js` is the one axios instance (`<VITE_API_URL>/api`, 110 s timeout). The request interceptor fetches a fresh token from
+  `supabase.auth.getSession()` for **every** call. If there is no session it raises the `bizflow:unauthorized` event and the app returns to Login.
+- The response interceptor turns the backend's `{"error": {"code","message","details"}}` into a friendly `Error` (`apiError()`), with messages for each code
+  (for example `overpayment`, `duplicate_invoice`, `opening_cash_required`). A `401` signs the user out.
+- Optional multi-business support: `setBusinessId(id)` stores an id in `sessionStorage` and sends it as `X-Business-Id`. There is no business picker screen yet.
+- Money is displayed with `money()` in `components/UI.jsx` (Indian formatting, INR).
 
-## 4. Suggested structure
+## 6. Safety rules built into the UI
 
-```
-src/
-├── main.jsx, App.jsx            router + auth guard
-├── services/
-│   ├── supabase.js              createClient(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
-│   ├── api.js                   axios instance, token + error interceptors
-│   ├── invoices.js  payments.js  expenses.js  analytics.js  assistant.js  cash.js
-├── pages/
-│   ├── Login.jsx
-│   ├── Dashboard.jsx
-│   ├── UploadInvoice.jsx        upload -> review -> confirm
-│   ├── Invoices.jsx             list + filters;  InvoiceDetail.jsx (payments, edit, delete)
-│   ├── Expenses.jsx
-│   ├── CashFlow.jsx             opening cash + forecast
-│   └── Assistant.jsx
-└── components/                  Layout/Sidebar, StatCard, DataTable, StatusBadge, WarningList, MoneyInput, EmptyState, Loading, ErrorBanner, charts
-```
+1. **Never auto-save.** Extracted data goes into an editable review form; saving needs the explicit **Confirm** button, which sends `confirmed: true` (+ `extraction_id`).
+2. If extraction fails (`ai_extraction_failed`) the form is empty and the user types the invoice manually.
+3. Validation warnings from the API are shown next to the form; errors block saving (the backend answers `422 invalid_invoice`).
+4. The forecast and the operating surplus are labelled as estimates; assumptions, warnings and the disclaimer are shown. A `409 opening_cash_required` shows the opening-cash form, not an error.
+5. Receivables and payables are shown separately, never added.
+6. Money from `extracted_fields` can arrive as text (for example `"1180.00"`); the form converts it to a number before saving.
+7. No secrets in the code; the access token is never logged or shown.
 
-## 5. Screens and the endpoints they use
-
-| Screen | What to build | Endpoints |
-|---|---|---|
-| **Login** | email + password via `supabase.auth.signInWithPassword`; redirect to Dashboard; sign-out button | Supabase only |
-| **Dashboard** | stat cards: sales total, expenses, **receivables**, **payables**, operating surplus (label it *estimate*, not profit); overdue count + table; monthly bar/line chart (sales vs expenses, cash in vs out); date range filter | `GET /analytics/summary`, `/analytics/overdue`, `/analytics/monthly` |
-| **Upload invoice** (hero screen) | drag-drop PDF/JPG/PNG (<=10 MB) -> spinner (OCR can take 10-60 s) -> **editable review form** pre-filled from `extracted_fields`, warnings shown next to fields, `raw_text_preview` collapsible -> **Confirm & Save** button sends `confirmed: true` + `extraction_id`. If `extraction_status = "ai_extraction_failed"` show an empty form with "please enter manually". Handle 409/410/422 from confirm | `POST /invoices/extract`, `POST /invoices` |
-| **Invoices** | table with filters (type, status, date range, party search), pagination (`limit`, `offset`, `total`), status badge (`unpaid` / `partially_paid` / `paid`), "needs review" badge when `review_status = needs_review` | `GET /invoices` |
-| **Invoice detail** | fields, paid / outstanding, its payments, **Record payment** modal (amount <= outstanding), edit, delete (explain 409 if it has payments) | `GET /invoices/{id}`, `GET /payments?invoice_id=`, `POST /payments`, `PATCH /invoices/{id}`, `DELETE /invoices/{id}` |
-| **Expenses** | list + add form (category, amount, date, paid/unpaid with `paid_date` shown only when paid), "mark as paid" action | `GET/POST /expenses`, `PATCH /expenses/{id}` |
-| **Cash flow** | form to set **opening cash** (amount + a **month-end** date; show the latest saved value) -> forecast chart (`periods` + `values`) with `assumptions`, `warnings` and the `disclaimer` always visible. If the API returns `409 opening_cash_required` show the opening-cash form, not an error. Selectors for `months` (1-12) and `window` | `PUT/GET /opening-cash`, `GET /forecast` |
-| **Assistant** | chat UI; suggested questions ("How much do customers owe me?", "Which invoices are overdue?", "How did my business perform?", "What is my expected cash flow?"); show `answer`, small "calculated by: tool_used" note, optional `data_used` table, clickable `follow_up`; handle `insufficient_data` and 502/503 politely | `POST /assistant/chat` |
-
-### Non-negotiable UX rules
-1. **Never auto-save** extracted data. The user must review and click Confirm.
-2. Show validation `warnings` (severity `warning` / `error`); `error` severity blocks saving (422 `invalid_invoice` -> show `details`).
-3. Receivables and payables are shown separately, never summed.
-4. Forecast is always labelled "estimate" with its assumptions and disclaimer. Do not show a forecast without opening cash.
-5. Loading, empty and error states on every screen (backend on Render free plan can take ~1 min on the first call - show "waking up the server...").
-6. Mobile-friendly layout (judges may open it on a phone).
-7. Do not log or display the access token.
-
-## 6. Demo / test data
-
-Log in with the user whose UID was put into `database/seed_demo.sql` ("Sen Electricals"). Expected dashboard: receivables **45,000**,
-payables **20,000**; after recording a 10,000 payment on INV-102 receivables become **35,000**. Upload files from `sample_data/invoices/`.
-
-## 7. Running and deploying
+## 7. Build and deploy
 
 ```bash
-npm run dev        # http://localhost:5173  (needs backend running on VITE_API_URL)
 npm run build      # outputs dist/
 ```
-Deploy suggestion: Vercel / Netlify / Render Static Site with env vars `VITE_API_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`.
-Then add the deployed URL to the backend's `ALLOWED_ORIGINS` on Render. SPA routing needs a rewrite of all paths to `index.html`.
 
-## 8. Definition of done
+Host `dist/` on Vercel, Netlify or any static host. Set the same three `VITE_` variables in the host's dashboard and keep the SPA rewrite
+(`vercel.json` already contains it; other hosts need an equivalent "all paths -> /index.html" rule). Then give the deployed HTTPS URL to the backend owner for `ALLOWED_ORIGINS`.
+The JS bundle currently triggers a Vite size warning; code-splitting is a possible later optimisation.
 
-- [ ] Login / logout works, protected routes redirect to login.
-- [ ] Upload -> review -> confirm -> appears in Invoices; duplicate number shows a friendly message.
-- [ ] Record payment updates status and the dashboard.
-- [ ] Expenses (paid/unpaid) work; opening cash + forecast work; the 409 case is handled.
-- [ ] Assistant answers the 5 example questions.
-- [ ] No hard-coded API URL or keys; `.env.example` present; `.env` not committed.
-- [ ] This README updated with real run/deploy instructions, screenshots and any deviations from the plan above.
+## 8. Verification checklist
 
-## 9. Open questions to settle with the backend owner
+Run against the deployed backend with the seeded demo user and tick each line before submission:
 
-- Signup / "create my business" has **no endpoint yet** (a new Supabase user gets `403 no_business_access` until a `business_members` row exists).
-  Either keep using seeded demo users, or ask for a small onboarding endpoint.
-- Uploaded invoice files cannot be re-downloaded (only `has_file` is returned).
-- Customers / suppliers tables exist but have no endpoints; party is a free-text `party_name`.
+- [ ] Login works, a wrong password shows an error, sign-out returns to Login, protected pages redirect when logged out
+- [ ] Overview: receivables **45,000**, payables **20,000**, the overdue invoice is listed
+- [ ] Upload `sample_data/invoices/sales_INV-103_total_mismatch.png`: a warning is shown and nothing is saved until Confirm
+- [ ] Confirm a new invoice (use a number that is not in the seed): it appears in Invoices; a duplicate number shows a friendly message
+- [ ] Record a 10,000 payment on INV-102: status changes and receivables become **35,000**; a payment above the outstanding amount is rejected
+- [ ] Add an expense as unpaid, then mark it paid
+- [ ] Cash flow: opening cash 150,000 at 2026-10-31 shows a forecast with assumptions and disclaimer
+- [ ] Assistant answers: receivables, overdue invoices, expected cash flow; "hi" gets a friendly reply
+- [ ] The layout works on a phone-sized screen and the night theme toggle works
+
+## 9. Known gaps (backend or frontend)
+
+- No sign-up / "create my business" endpoint: a new Supabase user gets `403 no_business_access` until a `business_members` row exists (done by SQL).
+- Uploaded invoice files cannot be downloaded again (the API only returns `has_file`).
+- The backend has no endpoint to delete payments or expenses; the expense list shows up to 100 records because the API returns no total for expenses.
+- The sidebar shows a fixed "My business" label (the API has no endpoint that returns the business name).
+- No automated frontend tests, ESLint is not set up, and the bundle is not code-split.

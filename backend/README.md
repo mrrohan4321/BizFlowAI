@@ -1,5 +1,7 @@
 # Backend (FastAPI)
 
+**Owner: Rohan Adak (Member 2).** Covers `backend/`, `database/` and the Render deployment (`../render.yaml`). Consumed by the React app in `../frontend/` (see [../frontend/README.md](../frontend/README.md)); wraps the `ai_ml/` module by Rajdeep Panja.
+
 REST API that sits between the frontend and the `ai_ml/` module. It owns authentication, business isolation,
 database access, file uploads and every endpoint. It does **not** contain financial formulas - receivables,
 payables, overdue, summary and forecast numbers all come from `ai_ml/`.
@@ -119,11 +121,12 @@ Extract response:
 ```json
 { "extraction_id": "uuid", "extraction_status": "ok | ai_extraction_failed",
   "extracted_fields": { "invoice_number": "INV-102", "invoice_type": "sales", "party_name": "...", "invoice_date": "2026-10-26",
-                        "due_date": "2026-11-10", "subtotal": 25423.73, "tax_amount": 4576.27, "cgst": null, "sgst": null,
-                        "igst": null, "total_amount": 30000.0, "gstin": null },
+                        "due_date": "2026-11-10", "subtotal": "25423.73", "tax_amount": "4576.27", "cgst": null, "sgst": null,
+                        "igst": null, "total_amount": "30000.00", "gstin": null },
   "warnings": [ { "field": "total_amount", "severity": "warning", "message": "..." } ],
   "needs_review": true, "raw_text_preview": "...", "expires_at": "ISO time", "saved": false }
 ```
+Money inside `extracted_fields` is serialized from `Decimal` and may arrive as **text** (`"30000.00"`); the client must convert it to a number (the frontend does). Money in every other response is a JSON number.
 If the LLM failed, `extraction_status = "ai_extraction_failed"`, all fields are null and the user must type the data manually.
 An extraction is **single-use** and **expires** (default 60 min): confirm with it twice -> 409 `extraction_already_used`,
 too late -> 410 `extraction_expired`.
@@ -157,7 +160,7 @@ Confirm: validation *errors* block saving (422 `invalid_invoice`, details list);
 | GET | `/analytics/monthly` | `labels[]`, `sales[]`, `expenses[]` (recorded) and `cash_income[]`, `cash_outflows[]` (actual), `cash_summary` - arrays are aligned to `labels` (chart-ready) |
 | GET | `/analytics/overdue` (`as_of`) | `count`, `overdue_receivables_total`, `overdue_payables_total`, `invoices[]` (each has `direction`: receivable/payable, `days_overdue`) |
 | GET | `/forecast` (`months` 1-12 default 3, `window` 1-12 default 3) | `periods[]`, `values[]` ({predicted_income, predicted_outflows, predicted_closing_cash}), `method`, `assumptions[]`, `warnings[]`, `insufficient_data`, `opening_cash`, `closing_cash`, `disclaimer`. **409 `opening_cash_required`** until opening cash is set |
-| POST | `/assistant/chat` | `{question}` (<=500 chars) -> `{question, answer, tool_used, data_used, insufficient_data, follow_up}` |
+| POST | `/assistant/chat` | `{question}` (<=500 chars) -> `{question, answer, tool_used, data_used, insufficient_data, follow_up}`. Greetings ("hi"), "what can you do?" and off-topic questions get a friendly canned answer from `ai_ml` with `tool_used: null`, `data_used: null`, `insufficient_data: false`. `insufficient_data: true` means missing data (for example no opening cash or no history) or the AI service being unavailable |
 | GET | `/health` | `{status, database}` (no auth) |
 
 Note: the route default `window=3` differs from the `ai_ml` default (12). It was chosen so a business with only a few
@@ -204,7 +207,7 @@ TEST_DATABASE_URL=postgresql://user:pass@host:5432/db python -m pytest tests -v
 Each run creates a random schema `bf_test_xxxx`, runs the migrations in it and drops it at the end. Groq is mocked; no API key
 is needed. Without a Postgres URL the whole backend suite is **skipped** (not failed). See [tests/README.md](tests/README.md).
 
-Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`.
+Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`. For the frontend: `cd ../frontend && npm run build`.
 
 ## 9. Deployment (Render)
 
@@ -212,6 +215,7 @@ Also run the AI/ML tests from the repo root: `python -m pytest ai_ml/tests -v`.
 
 - Blueprint: `../render.yaml` (web service, Python 3.12.7, free plan, Singapore).
 - Build: `pip install -r backend/requirements.txt`. Start: `cd backend && python -m app.db.migrate && uvicorn app.main:app --host 0.0.0.0 --port $PORT`.
+- The deployed frontend's HTTPS URL must be listed in `ALLOWED_ORIGINS`, otherwise browsers block the calls (CORS).
 - Set these in the Render dashboard (they are `sync: false`): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_JWT_SECRET` (if HS256),
   `GROQ_API_KEY`, `ALLOWED_ORIGINS` (add the deployed frontend URL!).
 - Uploaded files go to `/tmp/uploads` and vanish on restart. That is acceptable because a file is only needed during review.

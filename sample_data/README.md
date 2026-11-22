@@ -1,5 +1,7 @@
 # Sample data (synthetic only - never commit real invoices)
 
+Shared by the whole team (used by the demo, the smoke test and the frontend checks).
+
 Everything here is fictional. Real customer invoices must never be committed (`sample_data/real/` is git-ignored).
 
 ## `invoices/` - files for the upload demo (`POST /api/invoices/extract`)

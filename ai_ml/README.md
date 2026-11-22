@@ -1,5 +1,7 @@
 # BizFlowAI — AI/ML Module
 
+**Owner: Rajdeep Panja (Member 3).** Integrated into the FastAPI backend by Rohan Adak (see the table at the end of section 10) and shown in the React app by Ronit Jana.
+
 An AI-powered financial intelligence module for small businesses, built to support invoice processing, financial analysis, cash-flow forecasting, and natural-language financial assistance.
 
 The module combines OCR, structured AI-based extraction, deterministic Python calculations, and an LLM-powered assistant.
@@ -99,6 +101,7 @@ ai_ml/
 ├── assistant_tools.py
 ├── assistant.py
 └── tests/
+    ├── README.md
     ├── fixtures/
     │   └── messy_invoice_scenarios.json
     ├── test_config.py
@@ -492,6 +495,19 @@ Python performs the financial calculations.
 
 The LLM does not execute SQL or independently calculate financial totals.
 
+### Greetings, capability questions and out-of-scope questions
+
+When the question does not need a financial tool, the assistant does **not** call Groq. `_fallback_answer()` returns a fixed, friendly answer:
+
+| Question type | Examples | Result |
+|---|---|---|
+| Greeting | "hi", "hello", "good morning" | short welcome that lists what can be asked |
+| Capability | "what can you do?", "how can you help me?" | numbered list of the five supported areas |
+| Out of scope | "Should I buy bitcoin?" | polite redirect to finance topics |
+
+All three return `tool_used=None`, `data=None` and `insufficient_data=False`. `insufficient_data=True` is reserved for missing data
+(for example no history for the forecast) or an unavailable AI service.
+
 ### Backend arguments
 
 `answer_finance_question()` accepts:
@@ -541,6 +557,23 @@ The function returns an `AssistantResponse` containing:
 The `data` field contains the actual result from the approved Python tool.
 
 If Groq fails during answer generation, the calculated financial result is preserved and a fallback explanation is returned.
+
+### How the backend uses this module (status: integrated)
+
+| ai_ml function | Called from `backend/app/services/` | Used for |
+|---|---|---|
+| `invoice_extraction.extract_invoice` | `invoices.py` | `POST /api/invoices/extract` (result goes to a staging table, never straight into `invoices`) |
+| `validation.validate_invoice`, `schemas.InvoiceFields` | `invoices.py` | `POST /api/invoices`, `PATCH /api/invoices/{id}` |
+| `finance_metrics.outstanding`, `invoice_status`, `money` | `payments.py` | balance and status of every invoice, overpayment check |
+| `finance_metrics.calculate_business_summary` | `analytics.py` | `GET /api/analytics/summary` |
+| `assistant_tools.get_overdue_invoices_tool` | `analytics.py` | `GET /api/analytics/overdue` |
+| `assistant_tools.get_monthly_performance` | `analytics.py` | cash summary in `GET /api/analytics/monthly` |
+| `forecasting.get_forecast` | `analytics.py` | `GET /api/forecast` (the API route defaults to `window=3`; this module defaults to 12) |
+| `assistant.answer_finance_question` | `assistant.py` | `POST /api/assistant/chat` |
+
+The backend sends only the authenticated business's records, passes the real opening cash (and returns `409` if it is missing, never zero),
+and builds monthly history from actual payments and expenses marked paid. Do not change these function signatures without updating
+`backend/app/services/` and its tests. See [../backend/README.md](../backend/README.md).
 
 ## 11. Backend integration responsibilities
 
@@ -596,6 +629,8 @@ Run the complete suite quietly:
 ```powershell
 python -m pytest .\ai_ml\tests -q
 ```
+
+The test files and fixtures are described in [tests/README.md](tests/README.md). No API key or database is needed.
 
 Run only the synthetic invoice dataset tests:
 

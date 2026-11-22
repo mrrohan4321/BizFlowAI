@@ -1,5 +1,7 @@
 # Backend tests
 
+Owner: Rohan Adak. The AI/ML tests are separate: [../../ai_ml/tests/README.md](../../ai_ml/tests/README.md).
+
 ```bash
 cd backend
 TEST_DATABASE_URL=postgresql://user:pass@host:5432/db python -m pytest tests -v
@@ -22,7 +24,7 @@ TEST_DATABASE_URL=postgresql://user:pass@host:5432/db python -m pytest tests -v
 | `test_expenses_cash.py` | paid/unpaid rules, mark paid, opening cash upsert / negative / isolation |
 | `test_analytics.py` | summary (known answer: receivables 45k, payables 20k), date range, overdue, monthly, isolation |
 | `test_forecast.py` | 409 without opening cash, month-end rule, moving-average values, unpaid is not cash, short / empty history, parameter validation |
-| `test_assistant.py` | chat with mocked Groq, missing opening cash, unsupported question, Groq outage / missing key / bad AI response, other business data never sent to Groq |
+| `test_assistant.py` | chat with mocked Groq, missing opening cash, unsupported question, greetings and "what can you do?" (friendly answer, no tool), Groq outage / missing key / bad AI response, other business data never sent to Groq |
 | `test_security_and_migrations.py` | every table has RLS, migrations are safe to re-run |
 
 ## Writing a new test

@@ -1,5 +1,7 @@
 # Database (Supabase PostgreSQL)
 
+**Owner: Rohan Adak (Member 2).**
+
 Plain SQL, no ORM. The backend talks to it with psycopg2 (`backend/app/db/`).
 
 ## Files
@@ -42,7 +44,7 @@ All money columns are `NUMERIC(14,2)`. Every business table has `business_id` an
 ## Demo data
 
 1. Create a user in Supabase Auth and copy the **User UID**.
-2. Open `seed_demo.sql`, replace `demo_user UUID := '0000...'` with that UID.
+2. Open `seed_demo.sql` and set `demo_user UUID := '...'` to that UID (the file currently contains the team's demo user UID; replace it if you use your own Supabase project or user).
 3. Run the file in the Supabase SQL Editor (after migrating). Safe to re-run: it wipes and recreates only the "Sen Electricals" records.
 
 Known answers after seeding (also checked by `backend/scripts/smoke_test.py`):
